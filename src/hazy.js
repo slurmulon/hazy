@@ -64,7 +64,7 @@ hazy.lang = {
         var randObjByProp  = hazy.random[randProp]
             randObjSubType = randVal // get property of random operator following ":"
 
-        if (!randObjByProp) {
+        if (!randObjByProp || !randObjByProp[randObjSubType]) {
           throw hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported:', hazy.meta.types[randProp])
         }
 
@@ -109,7 +109,7 @@ hazy.lang = {
     results = _.reduce(results, function(total, n) { return total + n })
 
     // replace tokens in original string with processed replacements
-    if (_.isString(results) || _.isObject(results)) {
+    if (_.isString(results)) {
       return str.replace(this.expression, results) 
     }
 
@@ -138,6 +138,7 @@ hazy.stub = {
     return this.pool[key]
   },
 
+  // FIXME - allow for optional non-lazy override. by defult this should return a function
   register: function(name, stub) {
     this.pool[name] = this.process(stub)
   },
@@ -166,6 +167,9 @@ hazy.stub = {
       return stub(null, hazy.config.global.seed) // TODO - provide/support per-instance seed and the object key
     }
 
+    // TODO - determine if current stub matches a regex or name
+    // hazy.stub.
+
     return processedStub
   },
 
@@ -184,36 +188,34 @@ hazy.stub = {
   }
 }
 
-hazy.seed = {
+////////
+
+//////
+
+hazy.pattern = {
   pool: {},
 
-  register: function(seedConfig) {
-    var stubName = filtercConfig.name,
-        stubPath = filterConfig.path,
-        stubSeed = filterconfig.filter,
-        seedKey  = stubName || stubPath
+  appliesTo: function(stub) { // determines if a seed can be populated to the provided function
+    return this.pool.hasOwnProperty(stub)
+  },
 
-    if (!_.contains(hazy.seed.pool, stubName)) {
-      throw 'Stub is not registered, failed to register filter ' + stubName
+  register: function(path, value) {
+    this.pool[path] = value
+  },
+
+  registerConfig: function(patternConfig) {
+    var stubName       = patternConfig.stub,
+        patternPath    = patternConfig.path,
+        patternHandler = patternConfig.handler,
+        patternKey     = stubName || stubPath
+
+    if (!_.contains(this.pool, stubName)) {
+      throw 'Stub is not registered in pool, failed to register pattern ' + stubName
     }
 
-    this.pool.push[seedKey] = {name: stubName, path: stubPath, filter: filter}
+    this.pool[patternKey] = {name: stubName, path: stubPath, handler: patternHandler}
   }
-} // TODO - glob style pattern matching for dynamic seed injection for stubs
+}
 
-hazy.filter = {
-  pool: {},
-
-  register: function(filterConfig) {
-    var stubName   = filtercConfig.name,
-        stubPath   = filterConfig.path,
-        stubFilter = filterconfig.filter,
-        filterKey  = stubName || stubPath
-
-    if (!_.contains(hazy.seed.pool, stubName)) {
-      throw 'Stub is not registered, failed to register filter ' + stubName
-    }
-
-    this.pool.push[filterKey] = {name: stubName, path: stubPath, filter: filter}
-  }
-} // TODO - glob style pattern matching for lazy filtering against pre-processed stubs
+hazy.seed   = _.cloneDeep(hazy.pattern)
+hazy.filter = _.cloneDeep(hazy.pattern)
