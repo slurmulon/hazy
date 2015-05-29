@@ -5,8 +5,9 @@ var _ = require('lodash'),
 var hazy = {}
 
 hazy.config = {
-  global: {
-    seed: null
+  seed: null,
+  matchers: {
+    use: true
   }
 }
 
@@ -164,11 +165,14 @@ hazy.stub = {
     }
 
     if (_.isFunction(stub)) {
-      return stub(null, hazy.config.global.seed) // TODO - provide/support per-instance seed and the object key
+      return stub(null, hazy.config.seed) // TODO - provide/support per-instance seed and the object key
     }
 
     // TODO - determine if current stub matches a regex or name
     // hazy.stub.
+    if (hazy.config.matchers.use && hazy.matcher.hasMatch(stub)) {
+      console.log('MATCHED ', stub)
+    }
 
     return processedStub
   },
@@ -188,12 +192,10 @@ hazy.stub = {
   }
 }
 
-hazy.pattern = {
-  pool: {},
+// Matching filters which can be injected into your application before stubs are allocated to the stub pool
 
-  appliesTo: function(stub) { // determines if a seed can be populated to the provided function
-    return this.pool.hasOwnProperty(stub)
-  },
+hazy.matcher = {
+  pool: {},
 
   register: function(path, value) {
     this.pool[path] = value
@@ -201,17 +203,25 @@ hazy.pattern = {
 
   addConfig: function(config) {
     var stubName       = config.stub,
-        patternPath    = config.path,
-        patternHandler = config.handler,
-        patternKey     = stubName || stubPath
+        matcherPath    = config.path,
+        matcherHandler = config.handler,
+        matcherKey     = stubName || matcherPath
 
-    if (!_.contains(this.pool, stubName)) {
-      throw 'Stub is not registered in pool, failed to register pattern ' + stubName
-    }
+    // TODO - ensure stub is not yet processed in the stub pool before adding a matcher config
 
-    this.pool[patternKey] = {name: stubName, path: stubPath, handler: patternHandler}
-  }
+    this.pool[matcherKey] = {name: stubName, path: matcherPath, handler: matcherHandler}
+  },
+
+  hasMatch: function(stub) { // determines if a pattern applies to the provided stub (TODO - clearly optimize, madhax)
+    var inPool      = _.isString(stub) && this.pool.hasOwnProperty(stub)
+        matchExists = inPool || _.every(_.mapKeys(hazy.matcher.pool, function(v,pattern) {
+          return _.isString(stub) && !_.isUndefined(
+            jsonPath.query(pattern, stub)
+          )
+        }), true)
+
+    return matchExists
+  },
 }
 
-hazy.seed   = _.cloneDeep(hazy.pattern)
-hazy.filter = _.cloneDeep(hazy.pattern)
+
