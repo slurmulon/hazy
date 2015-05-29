@@ -184,3 +184,5 @@ hazy.stub = {
 
   }
 }
+
+hazy.seed = {} // TODO - integrate with hazy.stub so that seed functionality can be lazily linked to and evaluated
