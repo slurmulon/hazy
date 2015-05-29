@@ -90,7 +90,7 @@ hazy.lang = {
         var prevMatch   = chunks[i - 1],
             nextMatch   = chunks[i + 1],
             restMatches = _.drop(chunks, i + 1),
-            expResult   = this.token.process(match, prevMatch, nextMatch, restChunks)
+            expResult   = this.tokens.process(match, prevMatch, nextMatch, restChunks)
 
         if (expResult) {
           results.push(expResult)
