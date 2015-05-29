@@ -1,3 +1,7 @@
+var _ = require('lodash'),
+    Chance = require('chance'),
+    jsonPath = require('jsonpath')
+
 var hazy = {}
 
 hazy.config = {
@@ -105,10 +109,10 @@ hazy.lang = {
     results = _.reduce(results, function(total, n) { return total + n })
 
     // replace tokens in original string with processed replacements
-    if (_.isString(results)) {
-      results = str.replace(this.expression, results) 
+    if (_.isString(results) || _.isObject(results)) {
+      return str.replace(this.expression, results) 
     }
-    
+
     return results || str
   },
 
@@ -180,4 +184,18 @@ hazy.stub = {
   }
 }
 
-hazy.seed = {} // TODO - integrate with hazy.stub so that seed functionality can be lazily linked to and evaluated
+hazy.seed = {
+  pool: {},
+
+  register: function(pattern, filter) {
+
+  }
+} // TODO - glob style pattern matching for dynamic seed injection for stubs
+
+hazy.filter = {
+  pool: {},
+
+  register: function(pattern, filter) {
+    
+  }
+} // TODO - glob style pattern matching for lazy filtering against pre-processed stubs

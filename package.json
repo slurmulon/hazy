@@ -1,0 +1,28 @@
+{
+  "name": "hazy",
+  "version": "0.0.0",
+  "description": "Lazy JSON stubbing",
+  "main": "hazy.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/slurmulon/hazy.git"
+  },
+  "keywords": [
+    "hazy",
+    "stub",
+    "json"
+  ],
+  "author": "MadHax",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/slurmulon/hazy/issues"
+  },
+  "dependencies": {
+    "chance": "~0.7.5",
+    "lodash": "~3.9.3",
+    "jsonpath": "~0.1.4"
+  }
+}
