@@ -26,7 +26,7 @@ hazy.meta = {
 hazy.lang = {
   expression: /\|(:|~|@)(.*?)?\|/,
   tokens: {
-    "|": function(pos, prev, next) { // expression start/end
+    "|": function(prev, next) { // expression start/end
       var isPrevToken    = this.validate(prev),
           isNextTokenEnd = /\|/.test(next) 
 
@@ -40,7 +40,7 @@ hazy.lang = {
       }
     },
 
-    ":": function(pos, prev, next) { // property accessor
+    ":": function(prev, next) { // property accessor
       if (!prev) {
         throw new Exception('Syntax error, : requires a left operand')
       }
@@ -80,16 +80,17 @@ hazy.lang = {
   },
 
   process: function(str) {
-    var chunks  = this.expression.match(str)
+    var matches  = this.expression.match(str)
     var results = []
 
-    _.forEach(chunks, function(i, chunk) {
-      var isToken = this.token.validate(chunk)
+    _.forEach(matches, function(i, match) {
+      var isToken = this.token.validate(match)
 
       if (isToken) {
-        var nextChunk  = chunks[i + 1],
-            restChunks = _.drop(chunks, i + 1),
-            expResult  = this.token.process(chunk, nextChunk, restChunks)
+        var prevMatch   = chunks[i - 1],
+            nextMatch   = chunks[i + 1],
+            restMatches = _.drop(chunks, i + 1),
+            expResult   = this.token.process(match, prevMatch, nextMatch, restChunks)
 
         if (expResult) {
           results.push(expResult)
