@@ -225,3 +225,31 @@ hazy.matcher = {
 }
 
 
+
+// hazy.seed   = _.cloneDeep(hazy.pattern)
+// hazy.filter = _.cloneDeep(hazy.pattern)
+
+// ------------------------------------------------------------ kitchen sink
+
+hazy.matcher.addConfig({
+  stub: 'someDog',
+  handler: function() {
+    // do something to the stub 
+    console.log('derp')
+  }
+})
+
+
+
+hazy.stub.register('someDude', {
+  name: '|~person:name|',
+  ssn: '|~person:ssn| (JK)',
+  id: '|~misc:guid|'
+})
+
+hazy.stub.register('someDog', {
+  name: '|~basic:character|',
+  owner: '|@someDude|'
+})
+
+console.log('HAZY SEED POOL ', hazy.stub.get('someDog'))
