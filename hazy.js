@@ -55,8 +55,6 @@ hazy.lang = {
       var randProp   = next.split(':')[0] // match text to next : or |
           randVal    = next.split(':')[1]
           canUseProp = hazy.random.hasOwnProperty(randProp)
-          
-      console.log('~  ', randProp, hazy.random[randProp])
 
       if (canUseProp) {
         var randObjByProp  = hazy.random[randProp]
