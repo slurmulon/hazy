@@ -70,7 +70,7 @@ hazy.lang = {
     },
 
     "@": function(prev, next) { // link to stub
-      return hazy.link.follow(next)
+      return hazy.stub.get(next)
     },
 
     validate: function(token) {
@@ -168,12 +168,6 @@ hazy.stub = {
   },
 
   write: function() {
-
-  }
-}
-
-hazy.link = {
-  follow: function() {
 
   }
 }
