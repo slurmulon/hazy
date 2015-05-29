@@ -188,10 +188,6 @@ hazy.stub = {
   }
 }
 
-////////
-
-//////
-
 hazy.pattern = {
   pool: {},
 
