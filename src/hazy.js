@@ -142,7 +142,7 @@ hazy.stub = {
     this.pool[name] = this.process(stub)
   },
 
-  process: function(stub) {
+  process: function(stub) { // dynamically process stub values by type (object, string, array, or function)
     var processedStub = {}
 
     if (_.isPlainObject(stub)) {
@@ -169,7 +169,7 @@ hazy.stub = {
     return processedStub
   },
 
-  load: function(file) { // TODO
+  load: function(file) { // TODO - load from FS
     if (_.isArray(file)) {
       _.forEach(file, function() {
         
@@ -180,22 +180,40 @@ hazy.stub = {
   },
 
   write: function() {
-
+    // TODO - write to FS
   }
 }
 
 hazy.seed = {
   pool: {},
 
-  register: function(pattern, filter) {
+  register: function(seedConfig) {
+    var stubName = filtercConfig.name,
+        stubPath = filterConfig.path,
+        stubSeed = filterconfig.filter,
+        seedKey  = stubName || stubPath
 
+    if (!_.contains(hazy.seed.pool, stubName)) {
+      throw 'Stub is not registered, failed to register filter ' + stubName
+    }
+
+    this.pool.push[seedKey] = {name: stubName, path: stubPath, filter: filter}
   }
 } // TODO - glob style pattern matching for dynamic seed injection for stubs
 
 hazy.filter = {
   pool: {},
 
-  register: function(pattern, filter) {
-    
+  register: function(filterConfig) {
+    var stubName   = filtercConfig.name,
+        stubPath   = filterConfig.path,
+        stubFilter = filterconfig.filter,
+        filterKey  = stubName || stubPath
+
+    if (!_.contains(hazy.seed.pool, stubName)) {
+      throw 'Stub is not registered, failed to register filter ' + stubName
+    }
+
+    this.pool.push[{name: stubName, path: stubPath, filter: filter}]
   }
 } // TODO - glob style pattern matching for lazy filtering against pre-processed stubs

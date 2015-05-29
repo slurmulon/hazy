@@ -2,7 +2,7 @@
   "name": "hazy",
   "version": "0.0.0",
   "description": "Lazy JSON stubbing",
-  "main": "hazy.js",
+  "main": "src/hazy.js",
   "scripts": {
     "test": "gulp test"
   },
