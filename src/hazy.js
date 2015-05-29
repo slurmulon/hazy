@@ -31,7 +31,7 @@ hazy.meta = {
 }
 
 hazy.lang = {
-  expression: /\|(:|~|@)(.*?)?\|/,
+  expression: /\|(:|~|@)(.*?)?\|/g,
 
   tokens: {
     "|": function(prev, next) { // expression start/end
@@ -44,7 +44,7 @@ hazy.lang = {
 
       if (!next) {
         // return true
-        // TODO - return a special value saying that this is the end of the token expression sequence
+        // TODO - return a special value saying that this is the end of the token expression sequence. currenlty not technically needed
       }
     },
 
@@ -89,7 +89,7 @@ hazy.lang = {
   },
 
   process: function(str) {
-    var matches = str.match(this.expression)
+    var matches = str.split(this.expression)//str.match(this.expression)
     var results = []
 
     _.forEach(matches, function(match, i) {
@@ -107,14 +107,15 @@ hazy.lang = {
       }
     }, this)
     
-    results = _.reduce(results, function(total, n) { return total + n })
+    // essentially detokenization. original str is returned if no reducing can be performed
+    results = _.reduce(results, function(total, n) { return total + n }) || str
 
     // replace tokens in original string with processed replacements
     if (_.isString(results)) {
       return str.replace(this.expression, results) 
     }
 
-    return results || str
+    return results
   },
 
   exception: function(msg) {
@@ -226,10 +227,6 @@ hazy.matcher = {
 }
 
 
-
-// hazy.seed   = _.cloneDeep(hazy.pattern)
-// hazy.filter = _.cloneDeep(hazy.pattern)
-
 // ------------------------------------------------------------ kitchen sink
 
 hazy.matcher.addConfig({
@@ -249,7 +246,7 @@ hazy.stub.register('someDude', {
 })
 
 hazy.stub.register('someDog', {
-  name: '|~basic:character|',
+  name: ' !!Letter |~basic:character| xx |~basic:character|',
   owner: '|@someDude|'
 })
 
