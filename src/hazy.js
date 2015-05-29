@@ -199,10 +199,10 @@ hazy.pattern = {
     this.pool[path] = value
   },
 
-  registerConfig: function(patternConfig) {
-    var stubName       = patternConfig.stub,
-        patternPath    = patternConfig.path,
-        patternHandler = patternConfig.handler,
+  addConfig: function(config) {
+    var stubName       = config.stub,
+        patternPath    = config.path,
+        patternHandler = config.handler,
         patternKey     = stubName || stubPath
 
     if (!_.contains(this.pool, stubName)) {
