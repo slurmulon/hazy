@@ -70,14 +70,6 @@ hazy.lang = {
       return hazy.link.follow(next)
     },
 
-    // "*": function(next) {
-    //   // TODO - repeat last expression N times
-    // },
-
-    next: function(tokens) {
-      token
-    },
-
     validate: function(token) {
       return this.hasOwnProperty(token)
     },
@@ -134,8 +126,8 @@ hazy.stub = {
     this.pool[name] = stub
   },
 
-  process: function() {
-    // hazy.lang.process
+  process: function(stub, deep) {
+    // TODO hazy.lang.process on all strings in object (keys and values)
   },
 
   load: function(file) {
