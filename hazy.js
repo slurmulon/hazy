@@ -1,8 +1,10 @@
-var chance = require('chance')
-
 var hazy = {}
 
-hazy.config = {}
+hazy.config = {
+  global: {
+    seed: null
+  }
+}
 
 hazy.meta = {
   types: {
@@ -80,11 +82,11 @@ hazy.lang = {
   },
 
   process: function(str) {
-    var matches  = this.expression.match(str)
+    var matches  = str.match(this.expression)
     var results = []
 
     _.forEach(matches, function(i, match) {
-      var isToken = this.token.validate(match)
+      var isToken = this.tokens.validate(match)
 
       if (isToken) {
         var prevMatch   = chunks[i - 1],
@@ -96,7 +98,7 @@ hazy.lang = {
           results.push(expResult)
         }
       }
-    })
+    }, this)
 
     return results // TODO - probably want to flatten or something (like if all elements are strings, flatten to a single string)
   },
@@ -131,12 +133,16 @@ hazy.stub = {
             nextStub  = stub[key]
 
         resultStub[resultKey] = this.process(nextStub, resultStub)
-      })
+      }, this)
     }
 
-    if (_.isString(stub) {
-      resultStub[resultKey] = hazy.lang.process(stub)
-    })
+    if (_.isString(stub)) {
+      return hazy.lang.process(stub)
+    }
+
+    if (_.isFunction(stub)) {
+      return stub(null, hazy.config.global.seed) // TODO - provide/support per-instance seed and the object key
+    }
 
     return resultStub
   },
