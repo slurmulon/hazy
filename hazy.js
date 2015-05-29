@@ -54,7 +54,7 @@ hazy.lang = {
 
       if (canUseProp) {
         var randObjByProp  = hazy.random[randProp],
-            randObjSubType = _.first(rest) // get property of random operator following ":". FIXME, needs to be first match against rest string, not just first char
+            randObjSubType = _.first(rest) // get property of random operator following ":"
 
         if (!randObjByProp) {
           throw new hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported:', hazy.meta.types[randProp])
