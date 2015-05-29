@@ -202,12 +202,13 @@ hazy.matcher = {
   },
 
   addConfig: function(config) {
+    if (!_.isEmpty(hazy.stub.pool))
+      throw 'Matches can only be added before stubs are in the stub pool'
+
     var stubName       = config.stub,
         matcherPath    = config.path,
         matcherHandler = config.handler,
         matcherKey     = stubName || matcherPath
-
-    // TODO - ensure stub is not yet processed in the stub pool before adding a matcher config
 
     this.pool[matcherKey] = {name: stubName, path: matcherPath, handler: matcherHandler}
   },
