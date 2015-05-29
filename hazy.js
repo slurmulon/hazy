@@ -7,24 +7,24 @@ hazy.config = {}
 hazy.meta = {
   types: {
     basic  : ['bool', 'character', 'integer', 'natural', 'string'],
-    text   : ['paragraph', 'sentence', 'syllable', 'word']
-    person : ['age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix']
-    mobile : ['android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2']
-    // TODO
-    // web:
-    // location:
-    // time:
-    // finance:
-
-    '?': 'bool',
-    '#': 'number',
-    '_': 'string',
-    '$': this.finance,
+    text   : ['paragraph', 'sentence', 'syllable', 'word'],
+    person : ['age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix'],
+    mobile : ['android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2'],
+    web    : ['color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'],
+    geo    : ['address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'],
+    time   : ['ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'],
+    misc   : ['dice', 'guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted'],
+    
+    // aliases
+    '?' : 'bool',
+    '#' : 'number',
+    '_' : 'string',
+    '$' : this.finance,
   }
 }
 
 hazy.lang = {
-  expression: /\|(:|~|@)(.*?)?\|/, // /\|(.*?)\|/,
+  expression: /\|(:|~|@)(.*?)?\|/,
   tokens: {
     "|": function(pos, prev, next) { // expression start/end
       var isPrevToken    = this.validate(prev),
@@ -73,7 +73,7 @@ hazy.lang = {
     // "*": function(next) {
     //   // TODO - repeat last expression N times
     // },
-    
+
     next: function(tokens) {
       token
     },
