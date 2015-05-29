@@ -54,9 +54,11 @@ hazy.lang = {
       var randProp   = next.split(':')[0] // match text to next : or |
           randVal    = next.split(':')[1]
           canUseProp = hazy.random.hasOwnProperty(randProp)
+          
+      console.log('~  ', randProp, hazy.random[randProp])
 
       if (canUseProp) {
-        var randObjByProp  = new Chance()//hazy.random[randProp],
+        var randObjByProp  = hazy.random[randProp]
             randObjSubType = randVal // get property of random operator following ":"
 
         if (!randObjByProp) {
@@ -116,13 +118,19 @@ hazy.lang = {
   }
 }
 
-hazy.random = _.object(_.map(_.keys(hazy.meta.types), function(randomType, key) {
-  var subTypes = hazy.meta.types[randomType]
+hazy.random = _.mapValues(hazy.meta.types, function(value, key) {
+  var hazyRandObj = {}
   
-  return [randomType, _.map(subTypes, function(subType) {
-    return new Chance()[subType]
-  })]
-}))
+  _.forEach(value, function(v) {
+    var chanceObj = new Chance()[v]
+    
+    if (chanceObj) {
+      hazyRandObj[v] = function() { return new Chance()[v]() }
+    }
+  })
+  
+  return hazyRandObj
+})
 
 hazy.stub = {
   pool: {},
