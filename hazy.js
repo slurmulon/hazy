@@ -15,7 +15,7 @@ hazy.meta = {
     web    : ['color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'],
     geo    : ['address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'],
     time   : ['ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'],
-    misc   : ['dice', 'guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted']
+    misc   : ['guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted']
     
     // aliases
     // '?' : 'bool',
@@ -27,6 +27,7 @@ hazy.meta = {
 
 hazy.lang = {
   expression: /\|(:|~|@)(.*?)?\|/,
+
   tokens: {
     "|": function(prev, next) { // expression start/end
       var isPrevToken    = this.validate(prev),
@@ -122,11 +123,7 @@ hazy.random = _.mapValues(hazy.meta.types, function(value, key) {
   var hazyRandObj = {}
   
   _.forEach(value, function(v) {
-    var chanceObj = new Chance()[v]
-    
-    if (chanceObj) {
-      hazyRandObj[v] = function() { return new Chance()[v]() }
-    }
+     hazyRandObj[v] = function() { return new Chance()[v]() }
   })
   
   return hazyRandObj
@@ -170,10 +167,10 @@ hazy.stub = {
     return processedStub
   },
 
-  load: function(file) {
+  load: function(file) { // TODO
     if (_.isArray(file)) {
       _.forEach(file, function() {
-        // TODO
+        
       })
     } else {
 
