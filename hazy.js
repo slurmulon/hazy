@@ -83,7 +83,7 @@ hazy.lang = {
   },
 
   process: function(str) {
-    var matches  = str.match(this.expression)
+    var matches = str.match(this.expression)
     var results = []
 
     _.forEach(matches, function(match, i) {
@@ -101,9 +101,14 @@ hazy.lang = {
       }
     }, this)
     
-    var resultStr = _.reduce(results, function(total, n) { return total + n })
+    results = _.reduce(results, function(total, n) { return total + n })
 
-    return !_.isEmpty(results) ? resultStr : str
+    // replace tokens in original string with processed replacements
+    if (_.isString(results)) {
+      results = str.replace(this.expression, results) 
+    }
+    
+    return results || str
   },
 
   exception: function(msg) {
