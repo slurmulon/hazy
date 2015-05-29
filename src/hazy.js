@@ -214,6 +214,6 @@ hazy.filter = {
       throw 'Stub is not registered, failed to register filter ' + stubName
     }
 
-    this.pool.push[{name: stubName, path: stubPath, filter: filter}]
+    this.pool.push[filterKey] = {name: stubName, path: stubPath, filter: filter}
   }
 } // TODO - glob style pattern matching for lazy filtering against pre-processed stubs
