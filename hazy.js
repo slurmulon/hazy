@@ -76,12 +76,6 @@ hazy.lang = {
 
     process: function(token) {
       return this[token](_.slice(arguments, 1))
-    },
-
-    processNext: function(tokens) {
-      var nextToken = this.next()
-
-      return process(next)
     }
   },
 
