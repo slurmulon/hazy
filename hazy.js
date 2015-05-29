@@ -119,10 +119,26 @@ hazy.stub = {
 
   register: function(name, stub) {
     this.pool[name] = stub
+    this.process(stub)
   },
 
-  process: function(stub, deep) {
-    // TODO hazy.lang.process on all strings in object (keys and values)
+  process: function(stub, tailStub) {
+    var resultStub = tailStub || {}
+
+    if (_.isObject(stub)) {
+      _.forEach(_.keys(stub), function(key) {
+        var resultKey = hazy.lang.process(key),
+            nextStub  = stub[key]
+
+        resultStub[resultKey] = this.process(nextStub, resultStub)
+      })
+    }
+
+    if (_.isString(stub) {
+      resultStub[resultKey] = hazy.lang.process(stub)
+    })
+
+    return resultStub
   },
 
   load: function(file) {
