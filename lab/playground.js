@@ -1,4 +1,4 @@
-var hazy = require('./src/hazy')
+var hazy = require('../src/hazy')
 
 hazy.matcher.config({
   path: '$.owner.id',
