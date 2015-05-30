@@ -145,3 +145,9 @@ will resolve to the following provided that `someDude` is in the stub pool
 ## Matching
 
 This is in the works, but will allow for seed data and other functionality to be added at run-time and matched in Hazy via `jsonpath` (more to come)
+
+## TODO
+
+- [ ] Repeaters
+- [ ] Seeds and ranges for random data
+- [ ] Pattern matching
