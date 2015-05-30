@@ -170,12 +170,6 @@ hazy.stub = {
       return stub(null, hazy.config.seed) // TODO - provide/support per-instance seed and the object key
     }
 
-    // TODO - determine if current stub matches a regex or name
-    // hazy.stub.
-    // if (hazy.config.matchers.use && hazy.matcher.hasMatch(stub)) {
-    //   console.log('MATCHED ', stub)
-    // }
-
     return processedStub
   },
 
