@@ -76,8 +76,8 @@ hazy.lang = {
       }
     },
 
-    "@": function(prev, next) { // link to stub
-      return hazy.stub.get(next)
+    "@": function(prev, next) { // link to fixture
+      return hazy.fixture.get(next)
     },
 
     // TODO - / escape character
@@ -138,47 +138,47 @@ hazy.random = _.mapValues(hazy.meta.types, function(value, key) {
   return hazyRandObj
 })
 
-hazy.stub = {
+hazy.fixture = {
   pool: {},
 
-  // fetches a stub from the pool and processes it if necessary
+  // fetches a fixture from the pool and processes it if necessary
   get: function(key) { // TODO - may want to memoize this
-    var stub = this.pool[key]
+    var fixture = this.pool[key]
 
-    return hazy.config.lazy && _.isFunction(stub) ? stub() : stub
+    return hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture
   },
 
-  // registers a processable stub into the stub pool
-  register: function(name, stub, lazy) {
-    this.pool[name] = lazy || hazy.config.lazy ? function() { return hazy.stub.process(stub) } : this.process(stub)
+  // registers a processable fixture into the fixture pool
+  register: function(name, fixture, lazy) {
+    this.pool[name] = lazy || hazy.config.lazy ? function() { return hazy.fixture.process(fixture) } : this.process(fixture)
   },
 
-   // dynamically process stub values by type (object, string, array, or function)
-  process: function(stub) {
-    var processedStub = stub
+   // dynamically process fixture values by type (object, string, array, or function)
+  process: function(fixture) {
+    var processedFixture = fixture
 
-    if (_.isPlainObject(stub)) {
-      _.mapKeys(stub, function(value, key) {
+    if (_.isPlainObject(fixture)) {
+      _.mapKeys(fixture, function(value, key) {
         var processedKey = hazy.lang.process(key),
-            nextStub     = value
+            nextFixture     = value
             
-        processedStub[processedKey] = hazy.stub.process(nextStub)
+        processedFixture[processedKey] = hazy.fixture.process(nextFixture)
       })
     }
 
-    if (_.isString(stub)) {
-      return hazy.lang.process(stub)
+    if (_.isString(fixture)) {
+      return hazy.lang.process(fixture)
     }
     
-    if (_.isArray(stub)) {
-      return _.map(stub, hazy.stub.process)
+    if (_.isArray(fixture)) {
+      return _.map(fixture, hazy.fixture.process)
     }
 
-    // apply pattern matching to processed stub if applicable
-    return hazy.matcher.processDeep(processedStub)
+    // apply pattern matching to processed fixture if applicable
+    return hazy.matcher.processDeep(processedFixture)
   },
 
-  // load and register a stub from file
+  // load and register a fixture from file
   load: function(file) {
     if (_.isArray(file)) {
       _.forEach(file, function() {
@@ -202,8 +202,8 @@ hazy.matcher = {
   },
 
   config: function(config) {
-    if (!_.isEmpty(hazy.stub.pool))
-      throw 'Matches can only be added before stubs are in the stub pool'
+    if (!_.isEmpty(hazy.fixture.pool))
+      throw 'Matches can only be added before fixtures are in the fixture pool'
 
     var matcherPath    = config.path,
         matcherHandler = config.handler
@@ -211,14 +211,14 @@ hazy.matcher = {
     this.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
   },
 
-  // provides a map of all matched patterns in a stub (pattern as key)
-  matches: function(stub) {
+  // provides a map of all matched patterns in a fixture (pattern as key)
+  matches: function(fixture) {
     var matches = {}
 
     if (hazy.config.matcher.use) {
       _.mapKeys(hazy.matcher.pool, function(v, pattern) {
-        if (_.isObject(stub)) {
-          var jpMatches = jsonPath.query(stub, pattern)
+        if (_.isObject(fixture)) {
+          var jpMatches = jsonPath.query(fixture, pattern)
 
           if (!_.isEmpty(jpMatches)) {
             matches[pattern] = jpMatches
@@ -232,37 +232,37 @@ hazy.matcher = {
     return matches
   },
 
-  // determines if any matches in the pool apply to the stub
-  hasMatch: function(stub) {
+  // determines if any matches in the pool apply to the fixture
+  hasMatch: function(fixture) {
     return !_.isEmpty(
-      hazy.matcher.matches(stub)
+      hazy.matcher.matches(fixture)
     )
   },
 
-  // executes a single pattern matcher handler on a stub
-  process: function(pattern, stub) {
+  // executes a single pattern matcher handler on a fixture
+  process: function(pattern, fixture) {
     var matcher = hazy.matcher.pool[pattern]
 
     if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
-      var matches = jsonPath.query(stub, pattern),
+      var matches = jsonPath.query(fixture, pattern),
           handler = matcher.handler
 
-      return handler(stub, matches, pattern)
+      return handler(fixture, matches, pattern)
     } else {
-      throw 'Match pattern does not apply to stub or handler is not a function'
+      throw 'Match pattern does not apply to fixture or handler is not a function'
     }
   },
 
-  // executes handlers for all pattern matches on a stub
-  processDeep: function(stub) {
-    var patternMatches = this.matches(stub)
-    var processedStub  = stub
+  // executes handlers for all pattern matches on a fixture
+  processDeep: function(fixture) {
+    var patternMatches = this.matches(fixture)
+    var processedFixture  = fixture
 
     _.mapKeys(patternMatches, function(match, pattern) {
-      processedStub = hazy.matcher.process(pattern, stub) || processedStub
+      processedFixture = hazy.matcher.process(pattern, fixture) || processedFixture
     })
 
-    return processedStub
+    return processedFixture
   }
 }
 

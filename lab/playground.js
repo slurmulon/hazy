@@ -3,28 +3,28 @@ var hazy = require('../src/hazy'),
 
 hazy.matcher.config({
   path: '$.owner.id',
-  handler: function(stub, matches, pattern) {
+  handler: function(fixture, matches, pattern) {
     console.log('\nMatched dog owner id ', matches, pattern)
 
-    return _.extend(stub, {special: true})  // return the stub after mutating it (if you so desire)
+    return _.extend(fixture, {special: true})  // return the fixture after mutating it (if you so desire)
   }
 })
 
-hazy.stub.register('someDude', {
+hazy.fixture.register('someDude', {
   id: '|~misc:guid|',
   name: '|~person:name|',
   ssn: '|~person:ssn| (not really)',
   twitter: '|~web:twitter|',
   // super: {
     deep: [
-      1, 2, 3, 4, 'derp'
+      1, 2, 3, 4, 'derp |~web:hashtag|'
     ]
   // }
 })
 
-hazy.stub.register('simpleDate', '|~time:date|')
+hazy.fixture.register('simpleDate', '|~time:date|')
 
-hazy.stub.register('someDog', {
+hazy.fixture.register('someDog', {
   id: '|~misc:guid|',
   name: 'Dawg|~basic:character|',
   owner: '|@someDude|',
@@ -33,6 +33,6 @@ hazy.stub.register('someDog', {
 
 
 
-console.log('\nSome dude:',  hazy.stub.get('someDude'))
-console.log('\nSome dog:',   hazy.stub.get('someDog'))
-console.log('\nSimple var:', hazy.stub.get('simpleDate'))
+console.log('\nSome dude:',  hazy.fixture.get('someDude'))
+console.log('\nSome dog:',   hazy.fixture.get('someDog'))
+console.log('\nSimple var:', hazy.fixture.get('simpleDate'))

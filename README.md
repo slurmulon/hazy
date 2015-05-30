@@ -24,26 +24,26 @@ Hazy lets developers describe test data in a generic fasion and allows for fixtu
 
 ### Examples
 
-Here we register a couple of Hazy fixtures into what's refered to as the stub pool:
+Here we register a couple of Hazy fixtures into what's refered to as the fixture pool:
 
 ```
 var hazy = require('hazy')
 
-hazy.stub.register('someDude', {
+hazy.fixture.register('someDude', {
   id   : '|~misc:guid|',
   name : '|~person:prefix| |~person:name|',
-  bday : '|~person:bday|',
+  bday : '|~person:birthday|',
   ssn  : '|~person:ssn| (not really)',
 })
 
-hazy.stub.register('someDog', {
+hazy.fixture.register('someDog', {
   id    : '|~misc:guid|',
   name  : 'Dawg',
   owner : '|@someDude|'
 })
 
-var hazyDude = hazy.stub.get('someDude')
-var hazyDog  = hazy.stub.get('someDog')
+var hazyDude = hazy.fixture.get('someDude')
+var hazyDog  = hazy.fixture.get('someDog')
 ```
 
 The processed fixtures result as follows:
@@ -117,17 +117,17 @@ The token for generating random data is `~`:
 
 ## Embedding
 
-Hazy supports lazy embedding of other JSON fixtures (or really any value) present in the stub pool. The example above shows this already:
+Hazy supports lazy embedding of other JSON fixtures (or really any value) present in the fixture pool. The example above shows this already:
 
 ```
-hazy.stub.register('someDog', {
+hazy.fixture.register('someDog', {
   id    : '|~misc:guid|',
   name  : 'Dawg',
   owner : '|@someDude|'
 })
 ```
 
-will resolve to the following provided that `someDude` is in the stub pool
+will resolve to the following provided that `someDude` is in the fixture pool
 
 ```
 {
