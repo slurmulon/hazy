@@ -11,7 +11,7 @@ var hazy = {}
 hazy.config = {
   seed: null,
   lazy: true,
-  matchers: {
+  matcher: {
     use: true
   }
 }
@@ -171,11 +171,8 @@ hazy.stub = {
       return _.map(stub, hazy.stub.process)
     }
 
-    if (hazy.matcher.hasMatch(processedStub)) {
-      console.log('MATCH! ', processedStub)
-    }
-
-    return processedStub
+    // apply pattern matching to processed stub if applicable
+    return hazy.matcher.processDeep(processedStub)
   },
 
   load: function(file) { // TODO - load from FS
@@ -192,8 +189,6 @@ hazy.stub = {
     // TODO - write to FS
   }
 }
-
-// Matching filters which can be injected into your application before stubs are allocated to the stub pool
 
 hazy.matcher = {
   pool: {},
@@ -212,26 +207,58 @@ hazy.matcher = {
     this.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
   },
 
+  // provides a map of all matched patterns in a stub (pattern as key)
   matches: function(stub) {
     var matches = {}
 
-     _.mapKeys(hazy.matcher.pool, function(v, pattern) {
-      if (_.isObject(stub)) {
-        var jpMatches = jsonPath.query(stub, pattern)
+    if (hazy.config.matcher.use) {
+      _.mapKeys(hazy.matcher.pool, function(v, pattern) {
+        if (_.isObject(stub)) {
+          var jpMatches = jsonPath.query(stub, pattern)
 
-        if (!_.isEmpty(jpMatches)) {
-          matches[pattern] = jpMatches
+          if (!_.isEmpty(jpMatches)) {
+            matches[pattern] = jpMatches
+          }
         }
-      }
-    })
+      })
+    } else {
+      // WARN - matching disabled
+    }
 
     return matches
   },
 
+  // determines if any matches in the pool apply to the stub
   hasMatch: function(stub) {
     return !_.isEmpty(
       hazy.matcher.matches(stub)
     )
+  },
+
+  // executes pattern matcher handler on a stub
+  process: function(pattern, stub) { // handles a single pattern match in a stub
+    var matcher = hazy.matcher.pool[pattern]
+
+    if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
+      var matches = jsonPath.query(stub, pattern),
+          handler = matcher.handler
+
+      return handler(stub, matches, pattern)
+    } else {
+      throw 'Match pattern does not apply to stub or handler is not a function'
+    }
+  },
+
+  // executes handlers for all pattern matches on a stub
+  processDeep: function(stub) { // handles all pattern matches in a stub
+    var patternMatches = this.matches(stub)
+    var processedStub  = stub
+
+    _.mapKeys(patternMatches, function(match, pattern) {
+      processedStub = hazy.matcher.process(pattern, stub) || processedStub
+    })
+
+    return processedStub
   }
 }
 
