@@ -91,7 +91,7 @@ hazy.lang = {
     }
   },
 
-  // extracts tokens from strs and evaluates them. interpolates strings, ignores other data types
+  // extracts tokens from strs and evaluates them. interpolates strings, ignores and simply returns other data types
   process: function(str) {
     var matches = str.split(hazy.lang.expression.all),
         tokens  = []
@@ -141,17 +141,20 @@ hazy.random = _.mapValues(hazy.meta.types, function(value, key) {
 hazy.stub = {
   pool: {},
 
+  // fetches a stub from the pool and processes it if necessary
   get: function(key) { // TODO - may want to memoize this
     var stub = this.pool[key]
 
     return hazy.config.lazy && _.isFunction(stub) ? stub() : stub
   },
 
+  // registers a processable stub into the stub pool
   register: function(name, stub, lazy) {
-    this.pool[name] = hazy.config.lazy || lazy ? function() { return hazy.stub.process(stub) } : this.process(stub)
+    this.pool[name] = lazy || hazy.config.lazy ? function() { return hazy.stub.process(stub) } : this.process(stub)
   },
 
-  process: function(stub) { // dynamically process stub values by type (object, string, array, or function)
+   // dynamically process stub values by type (object, string, array, or function)
+  process: function(stub) {
     var processedStub = stub
 
     if (_.isPlainObject(stub)) {
@@ -175,10 +178,11 @@ hazy.stub = {
     return hazy.matcher.processDeep(processedStub)
   },
 
-  load: function(file) { // TODO - load from FS
+  // load and register a stub from file
+  load: function(file) {
     if (_.isArray(file)) {
       _.forEach(file, function() {
-        
+         // TODO - load from FS, call register
       })
     } else {
 
@@ -235,8 +239,8 @@ hazy.matcher = {
     )
   },
 
-  // executes pattern matcher handler on a stub
-  process: function(pattern, stub) { // handles a single pattern match in a stub
+  // executes a single pattern matcher handler on a stub
+  process: function(pattern, stub) {
     var matcher = hazy.matcher.pool[pattern]
 
     if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
@@ -250,7 +254,7 @@ hazy.matcher = {
   },
 
   // executes handlers for all pattern matches on a stub
-  processDeep: function(stub) { // handles all pattern matches in a stub
+  processDeep: function(stub) {
     var patternMatches = this.matches(stub)
     var processedStub  = stub
 
