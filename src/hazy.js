@@ -255,8 +255,8 @@ hazy.matcher = {
 
   // executes handlers for all pattern matches on a fixture
   processDeep: function(fixture) {
-    var patternMatches = this.matches(fixture)
-    var processedFixture  = fixture
+    var patternMatches   = this.matches(fixture)
+    var processedFixture = fixture
 
     _.mapKeys(patternMatches, function(match, pattern) {
       processedFixture = hazy.matcher.process(pattern, fixture) || processedFixture

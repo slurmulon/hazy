@@ -40,4 +40,4 @@ hazy.fixture.register('someShark', {
 
 console.log('\nSome dude:',  hazy.fixture.get('someDude'))
 console.log('\nSome dog:',   hazy.fixture.get('someDog'))
-console.log('\nSome shark:',   hazy.fixture.get('someShark'))
+console.log('\nSome shark:', hazy.fixture.get('someShark'))
