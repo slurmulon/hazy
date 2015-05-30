@@ -1,8 +1,10 @@
 'use strict';
 
-var _      = require('lodash'),
-    jp     = require('jsonpath'),
-    Chance = require('chance')
+var _        = require('lodash'),
+    jsonPath = require('jsonpath'),
+    fs       = require('fs'),
+    Chance   = require('chance')
+    // TODO - assert
 
 var hazy = {}
 
@@ -56,7 +58,7 @@ hazy.lang = {
     },
 
     "~": function(prev, next, rest) { // random data
-      var randProp   = next.split(':')[0], // match text to next : or |
+      var randProp   = next.split(':')[0],
           randVal    = next.split(':')[1],
           canUseProp = hazy.random.hasOwnProperty(randProp)
 
@@ -77,6 +79,8 @@ hazy.lang = {
     "@": function(prev, next) { // link to stub
       return hazy.stub.get(next)
     },
+
+    // TODO - / escape character
 
     validate: function(token) {
       return this.hasOwnProperty(token)
@@ -137,10 +141,10 @@ hazy.random = _.mapValues(hazy.meta.types, function(value, key) {
 hazy.stub = {
   pool: {},
 
-  get: function(key) {
+  get: function(key) { // TODO - may want to memoize this
     var stub = this.pool[key]
 
-    return hazy.config.lazy ? stub() : stub
+    return hazy.config.lazy && _.isFunction(stub) ? stub() : stub
   },
 
   register: function(name, stub, lazy) {
@@ -171,6 +175,10 @@ hazy.stub = {
       return stub(null, hazy.config.seed) // TODO - provide/support per-instance seed and the object key
     }
 
+    if (hazy.matcher.hasMatch(processedStub)) {
+      console.log('MATCH!')
+    }
+
     return processedStub
   },
 
@@ -184,7 +192,7 @@ hazy.stub = {
     }
   },
 
-  write: function() {
+  write: function(path) {
     // TODO - write to FS
   }
 }
@@ -198,27 +206,24 @@ hazy.matcher = {
     this.pool[path] = value
   },
 
-  addConfig: function(config) {
+  config: function(config) {
     if (!_.isEmpty(hazy.stub.pool))
       throw 'Matches can only be added before stubs are in the stub pool'
 
-    var stubName       = config.stub,
-        matcherPath    = config.path,
-        matcherHandler = config.handler,
-        matcherKey     = stubName || matcherPath
+    var matcherPath    = config.path,
+        matcherHandler = config.handler
 
-    this.pool[matcherKey] = {name: stubName, path: matcherPath, handler: matcherHandler}
+    this.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
   },
 
   hasMatch: function(stub) { // determines if a pattern applies to the provided stub (TODO - clearly optimize, madhax)
-    var inPool      = _.isString(stub) && this.pool.hasOwnProperty(stub)
-        matchExists = inPool || _.every(_.mapKeys(hazy.matcher.pool, function(v, pattern) {
-          return _.isString(stub) && !_.isUndefined(
-            jp.query(pattern, stub)
-          )
-        }), true)
-
-    return matchExists
+    return _.any(_.mapKeys(hazy.matcher.pool, function(v, pattern) {
+      if (_.isObject(stub)) {
+        return _.isEmpty(
+          jsonPath.query(stub, pattern)
+        )
+      }
+    }), true)
   },
 }
 

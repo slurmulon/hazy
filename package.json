@@ -22,7 +22,12 @@
   },
   "dependencies": {
     "chance": "~0.7.5",
-    "lodash": "~3.9.3",
-    "jsonpath": "~0.1.4"
+    "jsonpath": "^0.1.4",
+    "lodash": "~3.9.3"
+  },
+  "devDependencies": {
+    "browserify": "^10.2.3",
+    "karma": "~0.12.0",
+    "karma-jasmine": "~0.1.0"
   }
 }

@@ -31,7 +31,7 @@ var hazy = require('hazy')
 
 hazy.stub.register('someDude', {
   id   : '|~misc:guid|',
-  name : '|~person:prefix| |~person:name| |~person:name|',
+  name : '|~person:prefix| |~person:name|',
   bday : '|~person:bday|',
   ssn  : '|~person:ssn| (not really)',
 })
@@ -117,7 +117,7 @@ The token for generating random data is `~`:
 
 ## Embedding
 
-Hazy supports lazily embedding of other JSON fixtures (or really any value) present in the stub pool. The example above shows this already:
+Hazy supports lazy embedding of other JSON fixtures (or really any value) present in the stub pool. The example above shows this already:
 
 ```
 hazy.stub.register('someDog', {
