@@ -21,12 +21,6 @@ hazy.meta = {
     geo    : ['address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'],
     time   : ['ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'],
     misc   : ['guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted']
-    
-    // aliases
-    // '?' : 'bool',
-    // '#' : 'number',
-    // '_' : 'string',
-    // '$' : this.finance,
   }
 }
 
