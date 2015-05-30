@@ -1,6 +1,8 @@
-var _ = require('lodash'),
-    Chance = require('chance'),
-    jsonPath = require('jsonpath')
+'use strict';
+
+var _      = require('lodash'),
+    jp     = require('jsonpath'),
+    Chance = require('chance')
 
 var hazy = {}
 
@@ -40,7 +42,6 @@ hazy.lang = {
       }
 
       if (!next) {
-        // return true
         // TODO - return a special value saying that this is the end of the token expression sequence. currenlty not technically needed
       }
     },
@@ -54,12 +55,12 @@ hazy.lang = {
     },
 
     "~": function(prev, next, rest) { // random data
-      var randProp   = next.split(':')[0] // match text to next : or |
-          randVal    = next.split(':')[1]
+      var randProp   = next.split(':')[0], // match text to next : or |
+          randVal    = next.split(':')[1],
           canUseProp = hazy.random.hasOwnProperty(randProp)
 
       if (canUseProp) {
-        var randObjByProp  = hazy.random[randProp]
+        var randObjByProp  = hazy.random[randProp],
             randObjSubType = randVal // get property of random operator following ":"
 
         if (!randObjByProp || !randObjByProp[randObjSubType]) {
@@ -85,9 +86,10 @@ hazy.lang = {
     }
   },
 
+  // extracts tokens from strs and evaluates them. interpolates strings, ignores other data types
   process: function(str) {
-    var matches = str.split(hazy.lang.expression.all)
-    var tokens = []
+    var matches = str.split(hazy.lang.expression.all),
+        tokens  = []
 
     _.forEach(matches, function(match, i) {
       var isToken = hazy.lang.tokens.validate(match)
@@ -109,8 +111,11 @@ hazy.lang = {
       }
     }, this)
 
-    // essentially detokenization. original str is returned if no reducing can be performed
-    return _.reduce(tokens, function(total, n) { return total + n }) || str
+    if (!_.isEmpty(tokens)) {
+      return _.reduce(tokens) || str
+    }
+
+    return str
   },
 
   exception: function(msg) {
@@ -205,9 +210,9 @@ hazy.matcher = {
 
   hasMatch: function(stub) { // determines if a pattern applies to the provided stub (TODO - clearly optimize, madhax)
     var inPool      = _.isString(stub) && this.pool.hasOwnProperty(stub)
-        matchExists = inPool || _.every(_.mapKeys(hazy.matcher.pool, function(v,pattern) {
+        matchExists = inPool || _.every(_.mapKeys(hazy.matcher.pool, function(v, pattern) {
           return _.isString(stub) && !_.isUndefined(
-            jsonPath.query(pattern, stub)
+            jp.query(pattern, stub)
           )
         }), true)
 
