@@ -171,10 +171,6 @@ hazy.stub = {
       return _.map(stub, hazy.stub.process)
     }
 
-    if (_.isFunction(stub)) {
-      return stub(null, hazy.config.seed) // TODO - provide/support per-instance seed and the object key
-    }
-
     if (hazy.matcher.hasMatch(processedStub)) {
       console.log('MATCH!')
     }
