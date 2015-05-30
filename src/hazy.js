@@ -172,7 +172,7 @@ hazy.stub = {
     }
 
     if (hazy.matcher.hasMatch(processedStub)) {
-      console.log('MATCH!')
+      console.log('MATCH! ', processedStub)
     }
 
     return processedStub
@@ -212,15 +212,27 @@ hazy.matcher = {
     this.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
   },
 
-  hasMatch: function(stub) { // determines if a pattern applies to the provided stub (TODO - clearly optimize, madhax)
-    return _.any(_.mapKeys(hazy.matcher.pool, function(v, pattern) {
+  matches: function(stub) {
+    var matches = {}
+
+     _.mapKeys(hazy.matcher.pool, function(v, pattern) {
       if (_.isObject(stub)) {
-        return _.isEmpty(
-          jsonPath.query(stub, pattern)
-        )
+        var jpMatches = jsonPath.query(stub, pattern)
+
+        if (!_.isEmpty(jpMatches)) {
+          matches[pattern] = jpMatches
+        }
       }
-    }), true)
+    })
+
+    return matches
   },
+
+  hasMatch: function(stub) {
+    return !_.isEmpty(
+      hazy.matcher.matches(stub)
+    )
+  }
 }
 
 module.exports = hazy
