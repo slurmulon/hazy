@@ -150,4 +150,3 @@ This is in the works, but will allow for seed data and other functionality to be
 
 - [ ] Repeaters
 - [ ] Seeds and ranges for random data
-- [ ] Pattern matching
