@@ -11,6 +11,7 @@ var hazy = {}
 hazy.config = {
   seed: null,
   lazy: true,
+  debug: false,
   matcher: {
     use: true
   }
@@ -142,11 +143,11 @@ hazy.fixture = {
   pool: {},
 
   // fetches a fixture from the pool and processes it if necessary
-  get: function(key) { // TODO - may want to memoize this
+  get: _.memoize(function(key) {
     var fixture = this.pool[key]
 
     return hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture
-  },
+  }),
 
   // registers a processable fixture into the fixture pool
   register: function(name, fixture, lazy) {
@@ -160,7 +161,7 @@ hazy.fixture = {
     if (_.isPlainObject(fixture)) {
       _.mapKeys(fixture, function(value, key) {
         var processedKey = hazy.lang.process(key),
-            nextFixture     = value
+            nextFixture  = value
             
         processedFixture[processedKey] = hazy.fixture.process(nextFixture)
       })
