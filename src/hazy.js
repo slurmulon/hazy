@@ -31,7 +31,11 @@ hazy.meta = {
 }
 
 hazy.lang = {
-  expression: /\|(:|~|@)(.*?)?\|/g,
+  // expression: /\|(:|~|@)(.*?)?\|/g,
+  expression: {
+    first : /\|(:|~|@)(.*?)?\|/,
+    all   : /\|(:|~|@)(.*?)?\|/g
+  },
 
   tokens: {
     "|": function(prev, next) { // expression start/end
@@ -89,8 +93,8 @@ hazy.lang = {
   },
 
   process: function(str) {
-    var matches = str.split(this.expression)//str.match(this.expression)
-    var results = []
+    var matches = str.split(this.expression.all)//str.match(this.expression)
+    var tokens = []
 
     _.forEach(matches, function(match, i) {
       var isToken = hazy.lang.tokens.validate(match)
@@ -99,23 +103,25 @@ hazy.lang = {
         var prevMatch   = matches[i - 1],
             nextMatch   = matches[i + 1],
             restMatches = _.drop(matches, i + 1),
-            expResult   = this.tokens.process(match, prevMatch, nextMatch, restMatches)
+            tokenResult = this.tokens.process(match, prevMatch, nextMatch, restMatches)
 
-        if (expResult) {
-          results.push(expResult)
+        if (tokenResult) {
+          // if processed token result is a string, substitute in original string as we iterate
+          if (_.isString(tokenResult)) {
+            str = str.replace(hazy.lang.expression.first, tokenResult)
+          } else {
+            tokens.push(tokenResult)
+          }
         }
       }
     }, this)
-    
-    // essentially detokenization. original str is returned if no reducing can be performed
-    results = _.reduce(results, function(total, n) { return total + n }) || str
 
-    // replace tokens in original string with processed replacements
-    if (_.isString(results)) {
-      return str.replace(this.expression, results) 
+    if (_.isString(tokens)) {
+      return str
     }
-
-    return results
+    
+    // // essentially detokenization. original str is returned if no reducing can be performed
+    return _.reduce(tokens, function(total, n) { return total + n }) || str
   },
 
   exception: function(msg) {
@@ -237,16 +243,14 @@ hazy.matcher.addConfig({
   }
 })
 
-
-
 hazy.stub.register('someDude', {
   name: '|~person:name|',
-  ssn: '|~person:ssn| (JK)',
+  ssn: '|~person:ssn| (not really)',
   id: '|~misc:guid|'
 })
 
 hazy.stub.register('someDog', {
-  name: ' !!Letter |~basic:character| xx |~basic:character|',
+  name: ' !!Letter |~basic:character| --- |~basic:character|',
   owner: '|@someDude|'
 })
 
