@@ -24,4 +24,7 @@ hazy.stub.register('someDog', {
   owner: '|@someDude|'
 })
 
+console.log('HAZY ASDFLKAJSDFASFD', hazy.stub.pool['someDog'])
+
+console.log('HAZY SEED POOL ', hazy.stub.get('someDog'))
 console.log('HAZY SEED POOL ', hazy.stub.get('someDog'))

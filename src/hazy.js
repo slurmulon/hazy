@@ -8,6 +8,7 @@ var hazy = {}
 
 hazy.config = {
   seed: null,
+  lazy: true,
   matchers: {
     use: true
   }
@@ -137,12 +138,13 @@ hazy.stub = {
   pool: {},
 
   get: function(key) {
-    return this.pool[key]
+    var stub = this.pool[key]
+
+    return hazy.config.lazy ? stub() : stub
   },
 
-  // FIXME - allow for optional non-lazy override. by defult this should return a function
-  register: function(name, stub) {
-    this.pool[name] = this.process(stub)
+  register: function(name, stub, lazy) {
+    this.pool[name] = hazy.config.lazy || lazy ? function() { return hazy.stub.process(stub) } : this.process(stub)
   },
 
   process: function(stub) { // dynamically process stub values by type (object, string, array, or function)
