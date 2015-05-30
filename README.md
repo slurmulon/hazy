@@ -1,6 +1,6 @@
 # Hazy
 
-Lazy and leight-weight JSON fixtures in Node
+Lazy and light-weight JSON fixtures in Node
 
 -----
 
