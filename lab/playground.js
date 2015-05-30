@@ -1,10 +1,12 @@
-var hazy = require('../src/hazy')
+var hazy = require('../src/hazy'),
+    _    = require('lodash')
 
 hazy.matcher.config({
   path: '$.owner.id',
-  handler: function(match) {
-    // do something to the stub 
-    console.log('dog owner id, derp')
+  handler: function(stub, matches, pattern) {
+    console.log('\nMatched dog owner id ', matches, pattern)
+
+    return _.extend(stub, {special: true})  // return the stub after mutating it (if you so desire)
   }
 })
 
@@ -23,7 +25,8 @@ hazy.stub.register('someDude', {
 hazy.stub.register('simpleDate', '|~time:date|')
 
 hazy.stub.register('someDog', {
-  name: ' !!Letter |~basic:character| --- |~basic:character|',
+  id: '|~misc:guid|',
+  name: 'Dawg|~basic:character|',
   owner: '|@someDude|',
   born: '|@simpleDate|'
 })

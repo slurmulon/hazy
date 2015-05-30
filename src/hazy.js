@@ -11,7 +11,7 @@ var hazy = {}
 hazy.config = {
   seed: null,
   lazy: true,
-  matchers: {
+  matcher: {
     use: true
   }
 }
@@ -91,7 +91,7 @@ hazy.lang = {
     }
   },
 
-  // extracts tokens from strs and evaluates them. interpolates strings, ignores other data types
+  // extracts tokens from strs and evaluates them. interpolates strings, ignores and simply returns other data types
   process: function(str) {
     var matches = str.split(hazy.lang.expression.all),
         tokens  = []
@@ -141,17 +141,20 @@ hazy.random = _.mapValues(hazy.meta.types, function(value, key) {
 hazy.stub = {
   pool: {},
 
+  // fetches a stub from the pool and processes it if necessary
   get: function(key) { // TODO - may want to memoize this
     var stub = this.pool[key]
 
     return hazy.config.lazy && _.isFunction(stub) ? stub() : stub
   },
 
+  // registers a processable stub into the stub pool
   register: function(name, stub, lazy) {
-    this.pool[name] = hazy.config.lazy || lazy ? function() { return hazy.stub.process(stub) } : this.process(stub)
+    this.pool[name] = lazy || hazy.config.lazy ? function() { return hazy.stub.process(stub) } : this.process(stub)
   },
 
-  process: function(stub) { // dynamically process stub values by type (object, string, array, or function)
+   // dynamically process stub values by type (object, string, array, or function)
+  process: function(stub) {
     var processedStub = stub
 
     if (_.isPlainObject(stub)) {
@@ -171,17 +174,15 @@ hazy.stub = {
       return _.map(stub, hazy.stub.process)
     }
 
-    if (hazy.matcher.hasMatch(processedStub)) {
-      console.log('MATCH!')
-    }
-
-    return processedStub
+    // apply pattern matching to processed stub if applicable
+    return hazy.matcher.processDeep(processedStub)
   },
 
-  load: function(file) { // TODO - load from FS
+  // load and register a stub from file
+  load: function(file) {
     if (_.isArray(file)) {
       _.forEach(file, function() {
-        
+         // TODO - load from FS, call register
       })
     } else {
 
@@ -192,8 +193,6 @@ hazy.stub = {
     // TODO - write to FS
   }
 }
-
-// Matching filters which can be injected into your application before stubs are allocated to the stub pool
 
 hazy.matcher = {
   pool: {},
@@ -212,15 +211,59 @@ hazy.matcher = {
     this.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
   },
 
-  hasMatch: function(stub) { // determines if a pattern applies to the provided stub (TODO - clearly optimize, madhax)
-    return _.any(_.mapKeys(hazy.matcher.pool, function(v, pattern) {
-      if (_.isObject(stub)) {
-        return _.isEmpty(
-          jsonPath.query(stub, pattern)
-        )
-      }
-    }), true)
+  // provides a map of all matched patterns in a stub (pattern as key)
+  matches: function(stub) {
+    var matches = {}
+
+    if (hazy.config.matcher.use) {
+      _.mapKeys(hazy.matcher.pool, function(v, pattern) {
+        if (_.isObject(stub)) {
+          var jpMatches = jsonPath.query(stub, pattern)
+
+          if (!_.isEmpty(jpMatches)) {
+            matches[pattern] = jpMatches
+          }
+        }
+      })
+    } else {
+      // WARN - matching disabled
+    }
+
+    return matches
   },
+
+  // determines if any matches in the pool apply to the stub
+  hasMatch: function(stub) {
+    return !_.isEmpty(
+      hazy.matcher.matches(stub)
+    )
+  },
+
+  // executes a single pattern matcher handler on a stub
+  process: function(pattern, stub) {
+    var matcher = hazy.matcher.pool[pattern]
+
+    if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
+      var matches = jsonPath.query(stub, pattern),
+          handler = matcher.handler
+
+      return handler(stub, matches, pattern)
+    } else {
+      throw 'Match pattern does not apply to stub or handler is not a function'
+    }
+  },
+
+  // executes handlers for all pattern matches on a stub
+  processDeep: function(stub) {
+    var patternMatches = this.matches(stub)
+    var processedStub  = stub
+
+    _.mapKeys(patternMatches, function(match, pattern) {
+      processedStub = hazy.matcher.process(pattern, stub) || processedStub
+    })
+
+    return processedStub
+  }
 }
 
 module.exports = hazy
