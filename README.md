@@ -4,8 +4,8 @@ Lazy and leight-weight JSON stubbing in JavaScript
 
 -----
 
-Hazy aims to ease the hassle of generating and maintaining fixtures by making your JSON fixtures programmatic through laziness.
-Hazy allows for fixtures to be processed and then easily manipulated further at run-time.
+Hazy aims to ease the hassle of generating and maintaining fixtures by making your JSON fixtures programmatic through laziness in more than one sense.
+Hazy lets developers describe test data in a generic fasion and allows for fixtures to be processed further at run-time for increased flexibility.
 
 ### Features
 
@@ -18,7 +18,7 @@ Hazy allows for fixtures to be processed and then easily manipulated further at 
 
 * Non-invasive
 * Pre-processed
-* Convention based
+* Convention based, interpreter agnostic
 * Unique and identifiable syntax
 * Cleanly integrate with __all__ testing frameworks
 
