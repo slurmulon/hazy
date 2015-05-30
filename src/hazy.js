@@ -219,3 +219,5 @@ hazy.matcher = {
     return matchExists
   },
 }
+
+module.exports = hazy
