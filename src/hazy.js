@@ -76,7 +76,7 @@ hazy.lang = {
       }
     },
 
-    "@": function(prev, next) { // link to fixture
+    "@": function(prev, next) { // link to fixture (TODO - make syntax support accessing properties of linked fixture)
       return hazy.fixture.get(next)
     },
 
