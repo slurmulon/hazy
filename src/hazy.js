@@ -31,7 +31,6 @@ hazy.meta = {
 }
 
 hazy.lang = {
-  // expression: /\|(:|~|@)(.*?)?\|/g,
   expression: {
     first : /\|(:|~|@)(.*?)?\|/,
     all   : /\|(:|~|@)(.*?)?\|/g
@@ -93,7 +92,7 @@ hazy.lang = {
   },
 
   process: function(str) {
-    var matches = str.split(this.expression.all)//str.match(this.expression)
+    var matches = str.split(hazy.lang.expression.all)
     var tokens = []
 
     _.forEach(matches, function(match, i) {
@@ -116,11 +115,7 @@ hazy.lang = {
       }
     }, this)
 
-    if (_.isString(tokens)) {
-      return str
-    }
-    
-    // // essentially detokenization. original str is returned if no reducing can be performed
+    // essentially detokenization. original str is returned if no reducing can be performed
     return _.reduce(tokens, function(total, n) { return total + n }) || str
   },
 
@@ -152,23 +147,23 @@ hazy.stub = {
   },
 
   process: function(stub) { // dynamically process stub values by type (object, string, array, or function)
-    var processedStub = {}
+    var processedStub = stub
 
     if (_.isPlainObject(stub)) {
       _.mapKeys(stub, function(value, key) {
         var processedKey = hazy.lang.process(key),
             nextStub     = value
             
-        processedStub[processedKey] = this.process(nextStub)
-      }, this)
-    }
-    
-    if (_.isArray(stub)) {
-      return _.map(stub, hazy.lang.process)
+        processedStub[processedKey] = hazy.stub.process(nextStub)
+      })
     }
 
     if (_.isString(stub)) {
       return hazy.lang.process(stub)
+    }
+    
+    if (_.isArray(stub)) {
+      return _.map(stub, hazy.stub.process)
     }
 
     if (_.isFunction(stub)) {
@@ -177,9 +172,9 @@ hazy.stub = {
 
     // TODO - determine if current stub matches a regex or name
     // hazy.stub.
-    if (hazy.config.matchers.use && hazy.matcher.hasMatch(stub)) {
-      console.log('MATCHED ', stub)
-    }
+    // if (hazy.config.matchers.use && hazy.matcher.hasMatch(stub)) {
+    //   console.log('MATCHED ', stub)
+    // }
 
     return processedStub
   },
@@ -231,27 +226,3 @@ hazy.matcher = {
     return matchExists
   },
 }
-
-
-// ------------------------------------------------------------ kitchen sink
-
-hazy.matcher.addConfig({
-  stub: 'someDog',
-  handler: function() {
-    // do something to the stub 
-    console.log('derp')
-  }
-})
-
-hazy.stub.register('someDude', {
-  name: '|~person:name|',
-  ssn: '|~person:ssn| (not really)',
-  id: '|~misc:guid|'
-})
-
-hazy.stub.register('someDog', {
-  name: ' !!Letter |~basic:character| --- |~basic:character|',
-  owner: '|@someDude|'
-})
-
-console.log('HAZY SEED POOL ', hazy.stub.get('someDog'))
