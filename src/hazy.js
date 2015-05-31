@@ -18,15 +18,17 @@ hazy.config = {
 }
 
 hazy.meta = {
-  types: {
-    basic  : ['bool', 'character', 'integer', 'natural', 'string'],
-    text   : ['paragraph', 'sentence', 'syllable', 'word'],
-    person : ['age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix'],
-    mobile : ['android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2'],
-    web    : ['color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'],
-    geo    : ['address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'],
-    time   : ['ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'],
-    misc   : ['guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted']
+  random: {
+    types: {
+      basic  : ['bool', 'character', 'integer', 'natural', 'string'],
+      text   : ['paragraph', 'sentence', 'syllable', 'word'],
+      person : ['age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix'],
+      mobile : ['android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2'],
+      web    : ['color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'],
+      geo    : ['address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'],
+      time   : ['ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'],
+      misc   : ['guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted']
+    }
   }
 }
 
@@ -68,12 +70,12 @@ hazy.lang = {
             randObjSubType = randVal // get property of random operator following ":"
 
         if (!randObjByProp || !randObjByProp[randObjSubType]) {
-          throw hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported:', hazy.meta.types[randProp])
+          throw hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported:', hazy.meta.random.types[randProp])
         }
 
         return randObjByProp[randObjSubType]()
       } else {
-        throw hazy.lang.exception('Invalid random data category "' + randProp + '". Supported', hazy.meta.types)
+        throw hazy.lang.exception('Invalid random data category "' + randProp + '". Supported', hazy.meta.random.types)
       }
     },
 
@@ -107,7 +109,7 @@ hazy.lang = {
             tokenResult = this.tokens.process(match, prevMatch, nextMatch, restMatches)
 
         if (tokenResult) {
-          // if processed token result is a string, substitute in original string as we iterate
+          // if processed token result is a string, substitute original string as we iterate
           if (_.isString(tokenResult)) {
             str = str.replace(hazy.lang.expression.first, tokenResult)
           } else {
@@ -129,7 +131,7 @@ hazy.lang = {
   }
 }
 
-hazy.random = _.mapValues(hazy.meta.types, function(value, key) {
+hazy.random = _.mapValues(hazy.meta.random.types, function(value, key) {
   var hazyRandObj = {}
   
   _.forEach(value, function(v) {
@@ -168,7 +170,7 @@ hazy.fixture = {
     var processedFixture = fixture
 
     if (_.isPlainObject(fixture)) {
-      _.mapKeys(fixture, function(value, key) {
+      _.forEach(fixture, function(value, key) {
         var processedKey = hazy.lang.process(key),
             nextFixture  = value
             
@@ -279,6 +281,7 @@ hazy.matcher = {
   }
 }
 
+// creates a clone of the current hazy object (shallow, new memory references)
 hazy.fork = function() {
   return _.clone(hazy, false)
 }
