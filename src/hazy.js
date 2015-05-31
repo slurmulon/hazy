@@ -308,7 +308,7 @@ hazy.matcher = {
     var patternMatches   = this.matches(fixture)
     var processedFixture = fixture
 
-    _.mapKeys(patternMatches, function(match, pattern) {
+    _.forEach(patternMatches, function(match, pattern) {
       processedFixture = hazy.matcher.process(pattern, fixture) || processedFixture
     })
 
