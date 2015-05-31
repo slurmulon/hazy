@@ -257,7 +257,8 @@ hazy.fixture.register('someDogWithoutOwner', {
 })
 
 var happyDog  = hazy.fixture.get('someDogWithOwner'),
-    lonelyDog = hazy.fixture.get('someDogWithoutOwner')
+    lonelyDog = hazy.fixture.get('someDogWithoutOwner'),
+    sleepyDog = null
 
 function innerTest() {
   var newHazy = hazy.fork()
@@ -273,13 +274,23 @@ function innerTest() {
     }
   })
 
-  var sleepyDog = newHazy.fixture.get('someDog')
-
-  sleepyDog.bark() // now prints "zzzz, too tired", overriding the matcher defined at a higher context level
+  sleepyDog = newHazy.fixture.get('someDogWithOwner')
 }
 
 innerTest()
 ```
+
+and now...
+
+```javascript
+happyDog.bark()
+```
+> still prints `woof woof, my owner is e76de72e-6010-5140-a270-da7b6b6ad2d7`, while
+
+```javascript
+sleepyDog.bark()
+```
+> now prints "zzzz, too tired", overriding the matcher defined at a higher context level (`happyDog`'s)
 
 ## TODO
 
