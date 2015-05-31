@@ -249,14 +249,7 @@ hazy.fixture.register('someDogWithOwner', {
   owner : '|@someDude|'
 })
 
-hazy.fixture.register('someDogWithoutOwner', {
-  id    : '|~misc:guid|',
-  name  : 'Lonely Dog',
-  owner : '|@someDude|'
-})
-
 var happyDog  = hazy.fixture.get('someDogWithOwner'),
-    lonelyDog = hazy.fixture.get('someDogWithoutOwner'),
     sleepyDog = null
 
 function innerTest() {
