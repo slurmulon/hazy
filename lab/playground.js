@@ -48,11 +48,11 @@ function innerTest() {
   newHazy.matcher.config({
     path    : '$.owner.id',
     handler : function(fixture) {
-      return _.extend(fixture, {
-        bark : function() {
-          console.log('zzzz, too tired')
-        }
-      })  
+      fixture.bark = function() {
+        console.log('zzzz, too tired')
+      }
+      
+      return fixture
     }
   })
 

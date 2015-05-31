@@ -228,7 +228,7 @@ lonelyDog.bark()
 > `Error: undefined is not a method`
 
 This feature can also be combined with `hazy.fork()` so that queries can be context-specific. Any query defined
-at a higher context level can be easily overwritten in a Hazy fork:
+at a higher context level can be easily and safely overwritten in a Hazy fork:
 
 ```javascript
 hazy.matcher.config({
@@ -266,11 +266,11 @@ function innerTest() {
   newHazy.matcher.config({
     path    : '$.owner.id',
     handler : function(fixture) {
-      return _.extend(fixture, {
-        bark : function() {
-          console.log('zzzz, too tired')
-        }
-      })  
+      fixture.bark = function() {
+        console.log('zzzz, too tired')
+      }
+      
+      return fixture
     }
   })
 
