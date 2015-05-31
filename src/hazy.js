@@ -8,6 +8,13 @@ var _        = require('lodash'),
 
 var hazy = {}
 
+//    ___             __ _       
+//   / __\___  _ __  / _(_) __ _ 
+//  / /  / _ \| '_ \| |_| |/ _` |
+// / /__| (_) | | | |  _| | (_| |
+// \____/\___/|_| |_|_| |_|\__, |
+//                         |___/ 
+
 hazy.config = {
   seed: null,
   lazy: true,
@@ -31,6 +38,13 @@ hazy.meta = {
     }
   }
 }
+
+//    __                   
+//   / /  __ _ _ __   __ _ 
+//  / /  / _` | '_ \ / _` |
+// / /__| (_| | | | | (_| |
+// \____/\__,_|_| |_|\__, |
+//                   |___/ 
 
 hazy.lang = {
   expression: {
@@ -131,6 +145,13 @@ hazy.lang = {
   }
 }
 
+//    __                 _                 
+//   /__\ __ _ _ __   __| | ___  _ __ ___  
+//  / \/// _` | '_ \ / _` |/ _ \| '_ ` _ \ 
+// / _  \ (_| | | | | (_| | (_) | | | | | |
+// \/ \_/\__,_|_| |_|\__,_|\___/|_| |_| |_|
+//
+
 hazy.random = _.mapValues(hazy.meta.random.types, function(value, key) {
   var hazyRandObj = {}
   
@@ -140,6 +161,13 @@ hazy.random = _.mapValues(hazy.meta.random.types, function(value, key) {
   
   return hazyRandObj
 })
+
+//    ___ _      _                       
+//   / __(_)_  _| |_ _   _ _ __ ___  ___ 
+//  / _\ | \ \/ / __| | | | '__/ _ \/ __|
+// / /   | |>  <| |_| |_| | | |  __/\__ \
+// \/    |_/_/\_\\__|\__,_|_|  \___||___/
+//
 
 hazy.fixture = {
   pool: {},
@@ -204,6 +232,13 @@ hazy.fixture = {
     // TODO - write to FS
   }
 }
+
+//               _       _                   
+//   /\/\   __ _| |_ ___| |__   ___ _ __ ___ 
+//  /    \ / _` | __/ __| '_ \ / _ \ '__/ __|
+// / /\/\ \ (_| | || (__| | | |  __/ |  \__ \
+// \/    \/\__,_|\__\___|_| |_|\___|_|  |___/
+//
 
 hazy.matcher = {
   pool: {},
@@ -280,6 +315,13 @@ hazy.matcher = {
     return processedFixture
   }
 }
+
+//    ___       _ _     _ 
+//   / __\_   _(_) | __| |
+//  /__\// | | | | |/ _` |
+// / \/  \ |_| | | | (_| |
+// \_____/\__,_|_|_|\__,_|
+//
 
 // creates a clone of the current hazy object (shallow, new memory references)
 hazy.fork = function() {
