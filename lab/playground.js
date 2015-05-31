@@ -41,7 +41,7 @@ hazy.fixture.register('someShark', {
   name: 'Tiger Shark',
   born: '|@simpleDate|',
   ate: ['|@someDog|', '|@someDude|' ],
-  processed: '|* $.owner|'
+  processed: '|*$.owner|'
 })
 
 console.log('\nSome dude:',  hazy.fixture.get('someDude'))

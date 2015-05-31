@@ -104,7 +104,12 @@ hazy.lang = {
 
     // lazily query and embed fixture
     "*": function(prev, next) {
-      return //hazy.fixture.query(next)
+      var origLazyConfig   = hazy.config.lazy  // temporarily disable lazy to avoid an infinite loop
+          hazy.config.lazy = false
+      var queryResult      = hazy.matcher.search(next)
+          hazy.config.lazy = origLazyConfig
+
+      return queryResult
     },
 
     // TODO - / escape character
