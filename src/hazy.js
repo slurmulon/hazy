@@ -103,9 +103,9 @@ hazy.lang = {
     },
 
     // lazily query and embed fixture
-    // "*": function(prev, next) {
-    //   return 
-    // }
+    "*": function(prev, next) {
+      return //hazy.fixture.query(next)
+    },
 
     // TODO - / escape character
 
@@ -122,6 +122,7 @@ hazy.lang = {
 
   // extracts tokens from strs and evaluates them. interpolates strings, ignores and simply returns other data types
   process: function(str) {
+    // console.log('processing ', str)
     var matches = str.split(hazy.lang.expression.all),
         tokens  = []
 
@@ -208,7 +209,7 @@ hazy.fixture = {
 
   // registers a processable fixture into the fixture pool
   register: function(name, fixture, lazy) {
-    this.pool[name] = lazy || hazy.config.lazy ? function() { return hazy.fixture.process(fixture) } : this.process(fixture)
+    this.pool[name] = (lazy ? lazy : hazy.config.lazy) ? function() { return hazy.fixture.process(fixture) } : this.process(fixture)
   },
 
    // dynamically process fixture values by type (object, string, array, or function)
@@ -237,18 +238,7 @@ hazy.fixture = {
 
     // queries the fixture pool for anything that matches the pattern
   query: function(pattern) {
-    var fixtures = this.all()
-
-    return _(fixtures)
-      .map(function(fixture) {
-        var jpMatches = jsonPath.query(fixture, pattern)
-
-        if (!_.isEmpty(jpMatches)) {
-          return fixture
-        }
-      })
-      .reject(_.isUndefined)
-      .value()
+    return hazy.matcher.search(pattern)
   },
 
   // load and register a fixture from files matching a glob pattern
@@ -325,6 +315,21 @@ hazy.matcher = {
     return !_.isEmpty(
       hazy.matcher.matches(fixture)
     )
+  },
+
+  search: function(pattern) {
+    var fixtures = hazy.fixture.all()
+
+    return _(fixtures)
+      .map(function(fixture) {
+        var jpMatches = jsonPath.query(fixture, pattern)
+
+        if (!_.isEmpty(jpMatches)) {
+          return fixture
+        }
+      })
+      .reject(_.isUndefined)
+      .value()
   },
 
   // executes a single pattern matcher handler on a fixture
