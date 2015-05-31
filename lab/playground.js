@@ -14,6 +14,7 @@ hazy.fixture.register('someDude', {
   id: '|~misc:guid|',
   name: '|~person:name|',
   ssn: '|~person:ssn| (not really)',
+  // TODO - something: '|* $.owner.id|'
   twitter: '|~web:twitter|',
   // super: {
     deep: [
@@ -41,3 +42,5 @@ hazy.fixture.register('someShark', {
 console.log('\nSome dude:',  hazy.fixture.get('someDude'))
 console.log('\nSome dog:',   hazy.fixture.get('someDog'))
 console.log('\nSome shark:', hazy.fixture.get('someShark'))
+
+console.log('\n\nall fixtures matching $.id', hazy.fixture.query('$.id'))
