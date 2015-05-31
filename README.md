@@ -204,8 +204,7 @@ hazy.fixture.register('someDogWithOwner', {
 
 hazy.fixture.register('someDogWithoutOwner', {
   id    : '|~misc:guid|',
-  name  : 'Lonely Dog',
-  owner : '|@someDude|'
+  name  : 'Lonely Dog'
 })
 
 var happyDog  = hazy.fixture.get('someDogWithOwner'),
@@ -290,7 +289,7 @@ happyDog.bark()
 ```javascript
 sleepyDog.bark()
 ```
-> now prints `zzzz, too tired`, overriding the matcher defined at a higher context level (AKA `happyDog`'s)
+> now prints `zzzz, too tired`, overriding the matcher defined at a higher context level (AKA `happyDog`'s) safely
 
 ## TODO
 
