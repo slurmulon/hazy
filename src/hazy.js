@@ -5,7 +5,6 @@ var _        = require('lodash'),
     fs       = require('fs'),
     glob     = require("glob"),
     Chance   = require('chance')
-    // TODO - assert
 
 var hazy = {}
 
@@ -97,19 +96,14 @@ hazy.lang = {
       }
     },
 
-    // lazily embed fixture
+    // embed fixture
     "@": function(prev, next) {
-      return hazy.fixture.get(next)
+      return hazy.fixture.get(next.trim())
     },
 
-    // lazily query and embed fixture
+    // query and embed fixture
     "*": function(prev, next) {
-      var origLazyConfig   = hazy.config.lazy  // temporarily disable lazy to avoid an infinite loop
-          hazy.config.lazy = false
-      var queryResult      = hazy.matcher.search(next)
-          hazy.config.lazy = origLazyConfig
-
-      return queryResult
+      return hazy.matcher.search(next.trim())
     },
 
     // TODO - / escape character
@@ -127,7 +121,6 @@ hazy.lang = {
 
   // extracts tokens from strs and evaluates them. interpolates strings, ignores and simply returns other data types
   process: function(str) {
-    // console.log('processing ', str)
     var matches = str.split(hazy.lang.expression.all),
         tokens  = []
 
@@ -193,7 +186,7 @@ hazy.fixture = {
   // fetches a fixture from the pool and processes it if necessary
   get: function(key) {
     var fixture     = this.pool[key],
-        hazyFixture = hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture
+        hazyFixture = hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture // FIXME - laziness doesn't work with query, axe this
 
     if (hazy.config.matcher.use) {
       return hazy.matcher.processDeep(hazyFixture)
@@ -214,7 +207,8 @@ hazy.fixture = {
 
   // registers a processable fixture into the fixture pool
   register: function(name, fixture, lazy) {
-    this.pool[name] = (lazy ? lazy : hazy.config.lazy) ? function() { return hazy.fixture.process(fixture) } : this.process(fixture)
+    // this.pool[name] = (lazy ? lazy : hazy.config.lazy) ? function() { return hazy.fixture.process(fixture) } : this.process(fixture)
+    this.pool[name] = this.process(fixture) // FIXME - wrap with a special lazy object opposed to just wrapping with a function, too ambiguous
   },
 
    // dynamically process fixture values by type (object, string, array, or function)
@@ -241,7 +235,7 @@ hazy.fixture = {
     return processedFixture
   },
 
-    // queries the fixture pool for anything that matches the pattern
+  // queries the fixture pool for anything that matches the jsonpath pattern
   query: function(pattern) {
     return hazy.matcher.search(pattern)
   },
@@ -254,15 +248,9 @@ hazy.fixture = {
       }
 
       _.forEach(files, function(file) {
-        hazy.fixture.process(
-          JSON.parse(file)
-        )
+        hazy.fixture.register(file.name, JSON.parse(file))
       })
     })
-  },
-
-  write: function(path) {
-    // TODO - write to FS
   }
 }
 
@@ -281,9 +269,6 @@ hazy.matcher = {
   },
 
   config: function(config) {
-    // if (!_.isEmpty(hazy.fixture.pool))
-    //   throw 'Matches can only be added before fixtures are in the fixture pool'
-
     var matcherPath    = config.path,
         matcherHandler = config.handler
 
@@ -322,8 +307,9 @@ hazy.matcher = {
     )
   },
 
+  // search the fixture pool for fixtures matching a specific pattern (intentionally non-lazy- prone to recursion hell and there's also little benefit in evaluating random values)
   search: function(pattern) {
-    var fixtures = hazy.fixture.all()
+    var fixtures = _.values(hazy.fixture.pool) 
 
     return _(fixtures)
       .map(function(fixture) {

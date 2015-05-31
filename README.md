@@ -252,7 +252,7 @@ hazy.fixture.register('someDogWithOwner', {
 var happyDog  = hazy.fixture.get('someDogWithOwner'),
     sleepyDog = null
 
-function innerTest() {
+function forkTest() {
   var newHazy = hazy.fork()
 
   newHazy.matcher.config({
@@ -269,7 +269,7 @@ function innerTest() {
   sleepyDog = newHazy.fixture.get('someDogWithOwner')
 }
 
-innerTest()
+forkTest()
 ```
 
 and now...

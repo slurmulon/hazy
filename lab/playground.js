@@ -39,16 +39,18 @@ hazy.fixture.register('someDog', {
 hazy.fixture.register('someShark', {
   id: '|~misc:guid|',
   name: 'Tiger Shark',
+  owner: 'hax',
   born: '|@simpleDate|',
-  ate: ['|@someDog|', '|@someDude|' ],
-  processed: '|*$.owner|'
+  ate: '|* $.id|', // queries pool for any fixture with an id defined
 })
 
-console.log('\nSome dude:',  hazy.fixture.get('someDude'))
-console.log('\nSome dog:',   hazy.fixture.get('someDog'))
+hazy.fixture.register('queryFixture', '|*$.born|')
+
+// console.log('\nSome dude:',  hazy.fixture.get('someDude'))
+// console.log('\nSome dog:',   hazy.fixture.get('someDog'))
 console.log('\nSome shark:', hazy.fixture.get('someShark'))
 
-function innerTest() {
+function forkTest() {
   var newHazy = hazy.fork()
 
   newHazy.matcher.config({
@@ -69,6 +71,7 @@ function innerTest() {
 
 hazy.fixture.get('someDog').bark()
 
-innerTest()
+forkTest()
 
-console.log('\n\nall fixtures matching $.id', hazy.fixture.query('$.id'))
+console.log('\nall fixtures matching $.id', hazy.fixture.query('$.id'))
+console.log('\nquery fixture:', hazy.fixture.get('queryFixture'))
