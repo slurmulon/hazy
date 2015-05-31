@@ -290,7 +290,7 @@ happyDog.bark()
 ```javascript
 sleepyDog.bark()
 ```
-> now prints "zzzz, too tired", overriding the matcher defined at a higher context level (`happyDog`'s)
+> now prints `zzzz, too tired`, overriding the matcher defined at a higher context level (AKA `happyDog`'s)
 
 ## TODO
 
