@@ -26,7 +26,7 @@ Hazy lets developers describe test data in a generic fasion and allows for fixtu
 
 Here we register a couple of Hazy fixtures into what's refered to as the fixture pool:
 
-```
+```javascript
 var hazy = require('hazy')
 
 hazy.fixture.register('someDude', {
@@ -48,7 +48,7 @@ var hazyDog  = hazy.fixture.get('someDog')
 
 The processed fixtures result as follows:
 
-```
+```javascript
 // hazyDude
 {
   id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
@@ -119,7 +119,7 @@ The token for generating random data is `~`:
 
 Hazy supports lazy embedding of other JSON fixtures (or really any value) present in the fixture pool. The example above shows this already:
 
-```
+```javascript
 hazy.fixture.register('someDog', {
   id    : '|~misc:guid|',
   name  : 'Dawg',
@@ -129,7 +129,7 @@ hazy.fixture.register('someDog', {
 
 will resolve to the following provided that `someDude` is in the fixture pool
 
-```
+```javascript
 {
   id: '427b2fa6-02f8-5be5-b3d1-cdf96f432e28',
   name: 'Dawg',
@@ -153,7 +153,7 @@ functionality relevant to their fixtures, and only when/where it's truly needed.
 
 Take our `someDog` fixture, for example:
 
-```
+```javascript
 {
   id: '427b2fa6-02f8-5be5-b3d1-cdf96f432e28',
   name: 'Dawg',
@@ -182,7 +182,7 @@ functionality to your fixtures.
 If we now wanted to query our fixture pool for any fixture with an `owner` object containing an `id` property,
 then we would use the following:
 
-```
+```javascript
 hazy.matcher.config({
   path    : '$.owner.id',
   handler : function(fixture, matches, pattern) {
@@ -215,13 +215,13 @@ var happyDog  = hazy.fixture.get('someDogWithOwner'),
 Since the `matcher` only applies to fixtures with an owner id, only `happyDog` will contain the `hasOwner` property and
 a `bark` method:
 
-```
+```javascript
 happyDog.bark()
 ```
 
 > `woof woof, my owner is e76de72e-6010-5140-a270-da7b6b6ad2d7`
 
-```
+```javascript
 lonelyDog.bark()
 ```
 
@@ -230,7 +230,7 @@ lonelyDog.bark()
 This feature can also be combined with `hazy.fork()` so that queries can be context-specific. Any query defined
 at a higher context level can be easily overwritten in a Hazy fork:
 
-```
+```javascript
 hazy.matcher.config({
   path    : '$.owner.id',
   handler : function(fixture, matches, pattern) {
@@ -262,9 +262,9 @@ var happyDog  = hazy.fixture.get('someDogWithOwner'),
 function innerTest() {
   var newHazy = hazy.fork()
 
-  hazy.matcher.config({
+  newHazy.matcher.config({
     path    : '$.owner.id',
-    handler : function() {
+    handler : function(fixture) {
       return _.extend(fixture, {
         bark : function() {
           console.log('zzzz, too tired')
@@ -273,9 +273,9 @@ function innerTest() {
     }
   })
 
-  var sleepyDog = hazy.fixture.get('someDogWithOwner')
+  var sleepyDog = newHazy.fixture.get('someDog')
 
-  sleepyDog.bark() // now prints "zzzz, too tired"
+  sleepyDog.bark() // now prints "zzzz, too tired", overriding the matcher defined at a higher context level
 }
 
 innerTest()
