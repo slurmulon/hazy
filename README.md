@@ -11,22 +11,22 @@ Hazy lets developers describe test data in a generic fasion and allows for fixtu
 
 * Lazy data matching in JSON fixtures
 * Lazy fixture embedding
-* Lazy function matching (supports `jsonpath`, more on this later)
+* Lazy processing via run-time queries ([jsonpath](http://goessner.net/articles/JsonPath/))
 * Syntax layer integrating `ChanceJS` that provides a simple and non-intrusive interface
 
 ### Design Goals
 
-* Non-invasive
-* Pre-processed
-* Convention based, interpreter agnostic
+* Non-invasive (retain all involved standards)
 * Unique and identifiable syntax
+* Convention based, interpreter agnostic
+* Pre-processed and optionally evaluated at run-time
 * Cleanly integrate with __all__ testing frameworks
 
 ### Examples
 
 Here we register a couple of Hazy fixtures into what's refered to as the fixture pool:
 
-```
+```javascript
 var hazy = require('hazy')
 
 hazy.fixture.register('someDude', {
@@ -48,7 +48,7 @@ var hazyDog  = hazy.fixture.get('someDog')
 
 The processed fixtures result as follows:
 
-```
+```javascript
 // hazyDude
 {
   id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
@@ -119,7 +119,7 @@ The token for generating random data is `~`:
 
 Hazy supports lazy embedding of other JSON fixtures (or really any value) present in the fixture pool. The example above shows this already:
 
-```
+```javascript
 hazy.fixture.register('someDog', {
   id    : '|~misc:guid|',
   name  : 'Dawg',
@@ -129,7 +129,7 @@ hazy.fixture.register('someDog', {
 
 will resolve to the following provided that `someDude` is in the fixture pool
 
-```
+```javascript
 {
   id: '427b2fa6-02f8-5be5-b3d1-cdf96f432e28',
   name: 'Dawg',
@@ -144,7 +144,145 @@ will resolve to the following provided that `someDude` is in the fixture pool
 
 ## Matching
 
-This is in the works, but will allow for seed data and other functionality to be added at run-time and matched in Hazy via `jsonpath` (more to come)
+Hazy utilizes `jsonpath` for defining functionality to pre-processed fixtures in a query-like fasion.
+Details on `jsonpath` can be found at http://goessner.net/articles/JsonPath/. There are many ways in which
+JSON objects can be queried using this flexible technique.
+
+The general idea in Haze is to give developers both fine grained and generalized control over the
+functionality relevant to their fixtures, and only when/where it's truly needed.
+
+Take our `someDog` fixture, for example:
+
+```javascript
+{
+  id: '427b2fa6-02f8-5be5-b3d1-cdf96f432e28',
+  name: 'Dawg',
+  owner: {
+    id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
+    name: 'Mrs. Cornelia Warner Agnes Hammond',
+    bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
+    ssn: '264-66-4154 (not really)'
+  }
+}
+```
+
+We can obtain the `id` of the dog's owner with the following query:
+
+`$.owner.id`
+
+After the fixture has been queried, this will result with:
+
+`e76de72e-6010-5140-a270-da7b6b6ad2d7`
+
+---
+
+With Hazy we can leverage this powerful query mechanism in any testing environment to provide test-specific
+functionality to your fixtures.
+
+If we now wanted to query our fixture pool for any fixture with an `owner` object containing an `id` property,
+then we would use the following:
+
+```javascript
+hazy.matcher.config({
+  path    : '$.owner.id',
+  handler : function(fixture, matches, pattern) {
+    // return the fixture after mutating it (if you so desire)
+    return _.extend(fixture, {
+      hasOwner : true,
+      bark     : function() {
+        console.log('woof woof, my owner is ', matches[0])
+      }
+    })  
+  }
+})
+
+hazy.fixture.register('someDogWithOwner', {
+  id    : '|~misc:guid|',
+  name  : 'Happy Dog',
+  owner : '|@someDude|'
+})
+
+hazy.fixture.register('someDogWithoutOwner', {
+  id    : '|~misc:guid|',
+  name  : 'Lonely Dog'
+})
+
+var happyDog  = hazy.fixture.get('someDogWithOwner'),
+    lonelyDog = hazy.fixture.get('someDogWithoutOwner')
+```
+
+Since the `matcher` only applies to fixtures with an owner id, only `happyDog` will contain the `hasOwner` property and
+a `bark` method:
+
+```javascript
+happyDog.bark()
+```
+
+> `woof woof, my owner is e76de72e-6010-5140-a270-da7b6b6ad2d7`
+
+```javascript
+lonelyDog.bark()
+```
+
+> `Error: undefined is not a method`
+
+This feature can also be combined with `hazy.fork()` so that queries can be context-specific. Any query defined
+at a higher context level can be easily and safely overwritten in a Hazy fork:
+
+```javascript
+hazy.matcher.config({
+  path    : '$.owner.id',
+  handler : function(fixture, matches, pattern) {
+    // return the fixture after mutating it (if you so desire)
+    return _.extend(fixture, {
+      hasOwner : true,
+      bark     : function() {
+        console.log('woof woof, my owner is ', matches[0])
+      }
+    })  
+  }
+})
+
+hazy.fixture.register('someDogWithOwner', {
+  id    : '|~misc:guid|',
+  name  : 'Happy Dog',
+  owner : '|@someDude|'
+})
+
+var happyDog  = hazy.fixture.get('someDogWithOwner'),
+    sleepyDog = null
+
+function innerTest() {
+  var newHazy = hazy.fork()
+
+  newHazy.matcher.config({
+    path    : '$.owner.id',
+    handler : function(fixture) {
+      fixture.bark = function() {
+        console.log('zzzz, too tired')
+      }
+      
+      return fixture
+    }
+  })
+
+  sleepyDog = newHazy.fixture.get('someDogWithOwner')
+}
+
+innerTest()
+```
+
+and now...
+
+```javascript
+happyDog.bark()
+```
+> still prints `woof woof, my owner is e76de72e-6010-5140-a270-da7b6b6ad2d7`, while
+
+```javascript
+sleepyDog.bark()
+```
+> now prints `zzzz, too tired`, overriding the matcher defined at a higher context level (AKA `happyDog`'s) safely
 
 ## TODO
 

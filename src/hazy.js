@@ -9,26 +9,43 @@ var _        = require('lodash'),
 
 var hazy = {}
 
+//    ___             __ _       
+//   / __\___  _ __  / _(_) __ _ 
+//  / /  / _ \| '_ \| |_| |/ _` |
+// / /__| (_) | | | |  _| | (_| |
+// \____/\___/|_| |_|_| |_|\__, |
+//                         |___/ 
+
 hazy.config = {
   seed: null,
   lazy: true,
+  debug: false,
   matcher: {
     use: true
   }
 }
 
 hazy.meta = {
-  types: {
-    basic  : ['bool', 'character', 'integer', 'natural', 'string'],
-    text   : ['paragraph', 'sentence', 'syllable', 'word'],
-    person : ['age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix'],
-    mobile : ['android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2'],
-    web    : ['color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'],
-    geo    : ['address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'],
-    time   : ['ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'],
-    misc   : ['guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted']
+  random: {
+    types: {
+      basic  : ['bool', 'character', 'integer', 'natural', 'string'],
+      text   : ['paragraph', 'sentence', 'syllable', 'word'],
+      person : ['age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix'],
+      mobile : ['android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2'],
+      web    : ['color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'],
+      geo    : ['address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'],
+      time   : ['ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'],
+      misc   : ['guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted']
+    }
   }
 }
+
+//    __                   
+//   / /  __ _ _ __   __ _ 
+//  / /  / _` | '_ \ / _` |
+// / /__| (_| | | | | (_| |
+// \____/\__,_|_| |_|\__, |
+//                   |___/ 
 
 hazy.lang = {
   expression: {
@@ -71,12 +88,12 @@ hazy.lang = {
             randObjSubType = randVal // get property of random operator following ":"
 
         if (!randObjByProp || !randObjByProp[randObjSubType]) {
-          throw hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported:', hazy.meta.types[randProp])
+          throw hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported:', hazy.meta.random.types[randProp])
         }
 
         return randObjByProp[randObjSubType]()
       } else {
-        throw hazy.lang.exception('Invalid random data category "' + randProp + '". Supported', hazy.meta.types)
+        throw hazy.lang.exception('Invalid random data category "' + randProp + '". Supported', hazy.meta.random.types)
       }
     },
 
@@ -118,7 +135,7 @@ hazy.lang = {
             tokenResult = this.tokens.process(match, prevMatch, nextMatch, restMatches)
 
         if (tokenResult) {
-          // if processed token result is a string, substitute in original string as we iterate
+          // if processed token result is a string, substitute original string as we iterate
           if (_.isString(tokenResult)) {
             str = str.replace(hazy.lang.expression.first, tokenResult)
           } else {
@@ -140,7 +157,14 @@ hazy.lang = {
   }
 }
 
-hazy.random = _.mapValues(hazy.meta.types, function(value, key) {
+//    __                 _                 
+//   /__\ __ _ _ __   __| | ___  _ __ ___  
+//  / \/// _` | '_ \ / _` |/ _ \| '_ ` _ \ 
+// / _  \ (_| | | | | (_| | (_) | | | | | |
+// \/ \_/\__,_|_| |_|\__,_|\___/|_| |_| |_|
+//
+
+hazy.random = _.mapValues(hazy.meta.random.types, function(value, key) {
   var hazyRandObj = {}
   
   _.forEach(value, function(v) {
@@ -150,15 +174,31 @@ hazy.random = _.mapValues(hazy.meta.types, function(value, key) {
   return hazyRandObj
 })
 
+//    ___ _      _                       
+//   / __(_)_  _| |_ _   _ _ __ ___  ___ 
+//  / _\ | \ \/ / __| | | | '__/ _ \/ __|
+// / /   | |>  <| |_| |_| | | |  __/\__ \
+// \/    |_/_/\_\\__|\__,_|_|  \___||___/
+//
+
 hazy.fixture = {
   pool: {},
 
   // fetches a fixture from the pool and processes it if necessary
-  get: function(key) { // TODO - may want to memoize this
-    var fixture = this.pool[key]
+  get: function(key) {
+    var fixture     = this.pool[key],
+        hazyFixture = hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture
 
-    return hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture
+    if (hazy.config.matcher.use) {
+      return hazy.matcher.processDeep(hazyFixture)
+    }
+
+    return hazyFixture
   },
+
+  lazyGet: _.memoize(function(key) {
+    return hazy.fixture.get(key)
+  }),
 
   all: function() {
     return _.map(hazy.fixture.pool, function(v, k) {
@@ -176,9 +216,9 @@ hazy.fixture = {
     var processedFixture = fixture
 
     if (_.isPlainObject(fixture)) {
-      _.mapKeys(fixture, function(value, key) {
+      _.forEach(fixture, function(value, key) {
         var processedKey = hazy.lang.process(key),
-            nextFixture     = value
+            nextFixture  = value
             
         processedFixture[processedKey] = hazy.fixture.process(nextFixture)
       })
@@ -192,8 +232,7 @@ hazy.fixture = {
       return _.map(fixture, hazy.fixture.process)
     }
 
-    // apply pattern matching to processed fixture if applicable
-    return hazy.matcher.processDeep(processedFixture)
+    return processedFixture
   },
 
     // queries the fixture pool for anything that matches the pattern
@@ -232,6 +271,13 @@ hazy.fixture = {
   }
 }
 
+//               _       _                   
+//   /\/\   __ _| |_ ___| |__   ___ _ __ ___ 
+//  /    \ / _` | __/ __| '_ \ / _ \ '__/ __|
+// / /\/\ \ (_| | || (__| | | |  __/ |  \__ \
+// \/    \/\__,_|\__\___|_| |_|\___|_|  |___/
+//
+
 hazy.matcher = {
   pool: {},
 
@@ -240,11 +286,15 @@ hazy.matcher = {
   },
 
   config: function(config) {
-    if (!_.isEmpty(hazy.fixture.pool))
-      throw 'Matches can only be added before fixtures are in the fixture pool'
+    // if (!_.isEmpty(hazy.fixture.pool))
+    //   throw 'Matches can only be added before fixtures are in the fixture pool'
 
     var matcherPath    = config.path,
         matcherHandler = config.handler
+
+    if (this.pool[matcherPath]) {
+      delete this.pool[matcherPath]
+    }
 
     this.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
   },
@@ -296,12 +346,24 @@ hazy.matcher = {
     var patternMatches   = this.matches(fixture)
     var processedFixture = fixture
 
-    _.mapKeys(patternMatches, function(match, pattern) {
+    _.forEach(patternMatches, function(match, pattern) {
       processedFixture = hazy.matcher.process(pattern, fixture) || processedFixture
     })
 
     return processedFixture
   }
+}
+
+//    ___       _ _     _ 
+//   / __\_   _(_) | __| |
+//  /__\// | | | | |/ _` |
+// / \/  \ |_| | | | (_| |
+// \_____/\__,_|_|_|\__,_|
+//
+
+// creates a clone of the current hazy object (shallow, new memory references)
+hazy.fork = function() {
+  return _.clone(hazy, false)
 }
 
 module.exports = hazy
