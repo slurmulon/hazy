@@ -143,10 +143,19 @@ hazy.fixture = {
   pool: {},
 
   // fetches a fixture from the pool and processes it if necessary
-  get: _.memoize(function(key) {
-    var fixture = this.pool[key]
+  get: function(key) {
+    var fixture     = this.pool[key],
+        hazyFixture = hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture
 
-    return hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture
+    if (hazy.config.matcher.use) {
+      return hazy.matcher.processDeep(hazyFixture)
+    }
+
+    return hazyFixture
+  },
+
+  lazyGet: _.memoize(function(key) {
+    return hazy.fixture.get(key)
   }),
 
   // registers a processable fixture into the fixture pool
@@ -175,8 +184,7 @@ hazy.fixture = {
       return _.map(fixture, hazy.fixture.process)
     }
 
-    // apply pattern matching to processed fixture if applicable
-    return hazy.matcher.processDeep(processedFixture)
+    return processedFixture
   },
 
   // load and register a fixture from file
@@ -203,11 +211,15 @@ hazy.matcher = {
   },
 
   config: function(config) {
-    if (!_.isEmpty(hazy.fixture.pool))
-      throw 'Matches can only be added before fixtures are in the fixture pool'
+    // if (!_.isEmpty(hazy.fixture.pool))
+    //   throw 'Matches can only be added before fixtures are in the fixture pool'
 
     var matcherPath    = config.path,
         matcherHandler = config.handler
+
+    if (this.pool[matcherPath]) {
+      delete this.pool[matcherPath]
+    }
 
     this.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
   },
@@ -265,6 +277,10 @@ hazy.matcher = {
 
     return processedFixture
   }
+}
+
+hazy.fork = function() {
+  return _.clone(hazy, false)
 }
 
 module.exports = hazy

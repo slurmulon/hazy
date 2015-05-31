@@ -2,11 +2,15 @@ var hazy = require('../src/hazy'),
     _    = require('lodash')
 
 hazy.matcher.config({
-  path: '$.owner.id',
-  handler: function(fixture, matches, pattern) {
-    console.log('\nMatched dog owner id ', matches, pattern)
-
-    return _.extend(fixture, {special: true})  // return the fixture after mutating it (if you so desire)
+  path    : '$.owner.id',
+  handler : function(fixture, matches, pattern) {
+    // return the fixture after mutating it (if you so desire)
+    return _.extend(fixture, {
+      hasOwner : true,
+      bark     : function() {
+        console.log('woof woof, my owner is ', matches[0])
+      }
+    })  
   }
 })
 
@@ -38,6 +42,25 @@ hazy.fixture.register('someShark', {
   ate: ['|@someDog|', '|@someDude|' ]
 })
 
-console.log('\nSome dude:',  hazy.fixture.get('someDude'))
-console.log('\nSome dog:',   hazy.fixture.get('someDog'))
-console.log('\nSome shark:', hazy.fixture.get('someShark'))
+function innerTest() {
+  var newHazy = hazy.fork()
+
+  newHazy.matcher.config({
+    path    : '$.owner.id',
+    handler : function(fixture) {
+      return _.extend(fixture, {
+        bark : function() {
+          console.log('zzzz, too tired')
+        }
+      })  
+    }
+  })
+
+  var sleepyDog = newHazy.fixture.get('someDog')
+
+  sleepyDog.bark() // now prints "zzzz, too tired"
+}
+
+hazy.fixture.get('someDog').bark()
+
+innerTest()
