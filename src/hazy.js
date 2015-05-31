@@ -3,6 +3,7 @@
 var _        = require('lodash'),
     jsonPath = require('jsonpath'),
     fs       = require('fs'),
+    glob     = require("glob"),
     Chance   = require('chance')
     // TODO - assert
 
@@ -31,12 +32,13 @@ hazy.meta = {
 
 hazy.lang = {
   expression: {
-    first : /\|(:|~|@)(.*?)?\|/,
-    all   : /\|(:|~|@)(.*?)?\|/g
+    first : /\|(:|~|@|\*)(.*?)?\|/,
+    all   : /\|(:|~|@|\*)(.*?)?\|/g
   },
 
   tokens: {
-    "|": function(prev, next) { // expression start/end
+    // expression start/end
+    "|": function(prev, next) { 
       var isPrevToken    = this.validate(prev),
           isNextTokenEnd = /\|/.test(next) 
 
@@ -49,6 +51,7 @@ hazy.lang = {
       }
     },
 
+    // property separator / accessor
     ":": function(prev, next) { // property accessor
       if (!prev) {
         throw 'Syntax error, : requires a left operand'
@@ -57,7 +60,8 @@ hazy.lang = {
       return prev[next]
     },
 
-    "~": function(prev, next, rest) { // random data
+    // random data
+    "~": function(prev, next, rest) {
       var randProp   = next.split(':')[0],
           randVal    = next.split(':')[1],
           canUseProp = hazy.random.hasOwnProperty(randProp)
@@ -76,11 +80,19 @@ hazy.lang = {
       }
     },
 
-    "@": function(prev, next) { // link to fixture (TODO - make syntax support accessing properties of linked fixture)
+    // lazily embed fixture
+    "@": function(prev, next) {
       return hazy.fixture.get(next)
     },
 
+    // lazily query and embed fixture
+    // "*": function(prev, next) {
+    //   return 
+    // }
+
     // TODO - / escape character
+
+    // TODO - ? random character
 
     validate: function(token) {
       return this.hasOwnProperty(token)
@@ -148,6 +160,12 @@ hazy.fixture = {
     return hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture
   },
 
+  all: function() {
+    return _.map(hazy.fixture.pool, function(v, k) {
+      return hazy.fixture.get(k)
+    })
+  },
+
   // registers a processable fixture into the fixture pool
   register: function(name, fixture, lazy) {
     this.pool[name] = lazy || hazy.config.lazy ? function() { return hazy.fixture.process(fixture) } : this.process(fixture)
@@ -178,15 +196,35 @@ hazy.fixture = {
     return hazy.matcher.processDeep(processedFixture)
   },
 
-  // load and register a fixture from file
-  load: function(file) {
-    if (_.isArray(file)) {
-      _.forEach(file, function() {
-         // TODO - load from FS, call register
-      })
-    } else {
+    // queries the fixture pool for anything that matches the pattern
+  query: function(pattern) {
+    var fixtures = this.all()
 
-    }
+    return _(fixtures)
+      .map(function(fixture) {
+        var jpMatches = jsonPath.query(fixture, pattern)
+
+        if (!_.isEmpty(jpMatches)) {
+          return fixture
+        }
+      })
+      .reject(_.isUndefined)
+      .value()
+  },
+
+  // load and register a fixture from files matching a glob pattern
+  load: function(pattern, options) {
+    glob(pattern, options, function (err, files) {
+      if (err) {
+        throw 'Failed to load file'
+      }
+
+      _.forEach(files, function(file) {
+        hazy.fixture.process(
+          JSON.parse(file)
+        )
+      })
+    })
   },
 
   write: function(path) {
@@ -216,7 +254,7 @@ hazy.matcher = {
     var matches = {}
 
     if (hazy.config.matcher.use) {
-      _.mapKeys(hazy.matcher.pool, function(v, pattern) {
+      _.forEach(hazy.matcher.pool, function(v, pattern) {
         if (_.isObject(fixture)) {
           var jpMatches = jsonPath.query(fixture, pattern)
 
