@@ -184,8 +184,8 @@ After the fixture has been queried, this will result with:
 
 ### Embedded Queries
 
-`jsonpath` expressions can be used with the query operator `*`. The results of the expression and will be embedded into the fixture upon processing.
-The syntax for embedded queries is:
+`jsonpath` expressions that match against the fixture pool can be specified with the query operator `*`.
+The results of the expression and will be embedded into the fixture upon processing. The syntax for embedded queries is:
 
 `|*<jsonpath-expression>|`
 
@@ -234,7 +234,7 @@ this will result with something like:
 }
 ```
 
-> **Note** the query operator currently always returns an `Array`. This is a limitation because it prevents you from being able to mixin with other operators. I hope to fix this soon.
+> **Note:** The query operator currently always returns an `Array`. I consider this a limitation because it makes it difficult to integrate queries with other expressions. I hope to fix this soon.
 
 ### Functional Queries
 
