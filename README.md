@@ -142,7 +142,10 @@ will resolve to the following provided that `someDude` is in the fixture pool
 }
 ```
 
-## Matching
+Hazy also supports more advanced ways of embedding fixtures using queries, but more on that will follow
+in the next section.
+
+## Queries
 
 Hazy utilizes `jsonpath` for defining functionality to pre-processed fixtures in a query-like fasion.
 Details on `jsonpath` can be found at http://goessner.net/articles/JsonPath/. There are many ways in which
@@ -284,7 +287,7 @@ sleepyDog.bark()
 ```
 > now prints `zzzz, too tired`, overriding the matcher defined at a higher context level (AKA `happyDog`'s) safely
 
-### Embedded Queries/Expressions
+### Embedded Queries
 
 `jsonpath` expressions can also be used as query values in your JSON fixtures and will be embedded upon processing. The operator for embedded queries is:
 
@@ -315,13 +318,14 @@ this will result with something like:
   id: '64af61f8-daa8-5959-8be4-bdd536ecc5bd',
   name: 'Tiger Shark',
   ate: 
-    [ {
+    [ { 
         id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
         name: 'Mrs. Cornelia Warner Agnes Hammond',
         bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
         ssn: '264-66-4154 (not really)'
       },
-      { id: '427b2fa6-02f8-5be5-b3d1-cdf96f432e28',
+      { 
+        id: '427b2fa6-02f8-5be5-b3d1-cdf96f432e28',
         name: 'Dawg',
         owner: {
           id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
