@@ -315,7 +315,6 @@ this will result with something like:
 { 
   id: '64af61f8-daa8-5959-8be4-bdd536ecc5bd',
   name: 'Tiger Shark',
-  owner: 'hax',
   born: Tue Jun 07 2067 10:13:50 GMT-0700 (PDT),
   ate: 
     [ {
