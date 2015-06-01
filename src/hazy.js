@@ -362,4 +362,7 @@ hazy.fork = function() {
   return _.clone(hazy, false)
 }
 
+// convenience reference to lodash so that developers don't have to explicitly import the lib in their own code
+hazy.util = _
+
 module.exports = hazy
