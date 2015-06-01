@@ -4,7 +4,7 @@
   "description": "Lazy JSON fixtures",
   "main": "src/hazy.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
