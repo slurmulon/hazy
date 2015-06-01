@@ -103,7 +103,7 @@ hazy.lang = {
 
     // query and embed fixture
     "*": function(prev, next) {
-      return hazy.matcher.search(next.trim())
+      return hazy.fixture.query(next.trim())
     },
 
     // TODO - / escape character
