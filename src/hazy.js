@@ -55,10 +55,9 @@ hazy.lang = {
   tokens: {
     // expression start/end
     "|": function(prev, next) { 
-      var isPrevToken    = this.validate(prev),
-          isNextTokenEnd = /\|/.test(next) 
+      var isNextTokenEnd = /\|/.test(next) 
 
-      if (isPrevToken || isNextTokenEnd) {
+      if (isNextTokenEnd) {
         throw hazy.lang.exception('Cannot define an empty expression')
       }
 

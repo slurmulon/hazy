@@ -37,11 +37,29 @@ describe('lang', function() {
 
   describe('tokens', function() {
     describe('|', function() {
+      it('should do nothing unless the next token is a |', function() {
+        (function(){
+          hazy.lang.tokens['|'](null, 'anything')
+        }).should.not.throw();
 
+        (function(){
+         hazy.lang.tokens['|'](null, '|')
+        }).should.throw();
+      })
     })
 
     describe(':', function() {
-      
+      it('should access the "next" property of the "prev" match', function() {
+        var testAccessor = hazy.lang.tokens[':']({test: 'works'}, 'test')
+
+        testAccessor.should.equal('works')
+      })
+
+      it('should throw an exception if there is no "prev" match', function() {
+        (function(){
+         hazy.lang.tokens[':'](null, ':')
+        }).should.throw()
+      })
     })
 
     describe('~', function() {
