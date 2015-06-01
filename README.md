@@ -151,8 +151,8 @@ Hazy utilizes `jsonpath` for defining functionality to pre-processed fixtures in
 Details on `jsonpath` can be found at http://goessner.net/articles/JsonPath/. There are many ways in which
 JSON objects can be queried using this flexible technique.
 
-The general idea in Haze is to give developers both fine grained and generalized control over the
-functionality relevant to their fixtures, and only when/where it's truly needed.
+The general idea in Haze is to give developers both fine grained and generalized control over the data and
+functionality relevant to their fixtures.
 
 Take our `someDog` fixture, for example:
 
