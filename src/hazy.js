@@ -21,6 +21,10 @@ hazy.config = {
   debug: false,
   matcher: {
     use: true
+  },
+  errors: {
+    quiet: false,
+    soft: false
   }
 }
 

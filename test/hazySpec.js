@@ -77,7 +77,26 @@ describe('lang', function() {
     })
 
     describe('@', function() {
-      
+      it('should embed fixtures with a matching name', function() {
+        var testChild  = {role: 'child'},
+            testParent = {role: 'parent', child: '|@testChild|'}
+
+        hazy.fixture.register('testChild', testChild)
+        hazy.fixture.register('testParent', testParent)
+
+        hazy.fixture.get('testParent').child.should.equal(testChild)
+      })
+
+      // FIXME - should probably make this replace value with 'undefined' instead of leaving an untouched token
+      it('should ignore embed links with no matching names', function() {
+        var testChild  = {role: 'child'},
+            testParent = {role: 'parent', child: '|@missingChild|'}
+
+        hazy.fixture.register('testChild', testChild)
+        hazy.fixture.register('testParent', testParent)
+
+        hazy.fixture.get('testParent').child.should.equal('|@missingChild|')
+      })
     })
 
     describe('*', function() {
