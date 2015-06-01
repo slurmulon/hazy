@@ -184,13 +184,14 @@ After the fixture has been queried, this will result with:
 
 ### Embedded Queries
 
-`jsonpath` expressions can also be used as query values in your JSON fixtures and will be embedded upon processing. The operator for embedded queries is:
+`jsonpath` expressions can be used with the query operator `*`. The results of the expression and will be embedded into the fixture upon processing.
+The syntax for embedded queries is:
 
 `|*<jsonpath-expression>|`
 
 where `<jsonpath-expression>` is a valid [jsonpath](http://goessner.net/articles/JsonPath/) expression
 
-> **Note:** Embedded queries are **not** and cannot be lazily evaluated because:
+> **Note:** Embedded queries are **not** and should not be lazily evaluated because:
 >
 > 1. Very high risk of cyclic dependencies and infinite recursion (e.g., some fixtures may need to be lazily evaluated if they have not already been, potentially triggering an endless cycle)
 > 2. Applying queries to pre-processed fixtures allows for cleaner queries (since you can query against Hazy tags) and provides consistent results.
@@ -237,8 +238,7 @@ this will result with something like:
 
 ### Functional Queries
 
-With Hazy we can leverage this powerful query mechanism in any testing environment to provide test-specific
-and finely grained functionality to your fixtures.
+With Hazy we can leverage this powerful query mechanism in any testing environment to provide test-specific functionality to your fixtures.
 
 For example, if we wanted to query our fixture pool for any fixture with an `owner` object containing an `id` property
 and then update those fixtures with new `bark()` functionality, then we would use the following:
@@ -286,6 +286,8 @@ lonelyDog.bark()
 ```
 
 > `Error: undefined is not a method`
+
+-----
 
 This feature can also be combined with `hazy.fork()` so that queries can be context-specific. Any query defined
 at a higher context level can be easily and safely overwritten in a Hazy fork:
