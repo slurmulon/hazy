@@ -204,7 +204,7 @@ Use of the operator is straight forward:
 hazy.fixture.register('someShark', {
   id   : '|~misc:guid|',
   name : 'Tiger Shark',
-  ate  : '|* $.id|', // queries pool for any fixture with a "name" property at the highest level
+  ate  : '|* $.id|', // queries pool for any fixture with an "id" property at the highest level
 })
 ```
 this will result with something like:
