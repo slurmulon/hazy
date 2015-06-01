@@ -69,6 +69,11 @@ The processed fixtures result as follows:
   }
 }
 
+### Installation
+
+```
+> git clone http://github.com/slurmulon/hazy.git
+> npm link hazy
 ```
 
 ## Randomness
