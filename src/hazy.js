@@ -328,10 +328,9 @@ hazy.matcher = {
     var matcher = hazy.matcher.pool[pattern]
 
     if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
-      var matches = jsonPath.query(fixture, pattern),
-          handler = matcher.handler
+      var matches = jsonPath.query(fixture, pattern)
 
-      return handler(fixture, matches, pattern)
+      return matcher.handler(fixture, matches, pattern)
     } else {
       throw 'Match pattern does not apply to fixture or handler is not a function'
     }

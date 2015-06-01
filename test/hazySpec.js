@@ -1,10 +1,43 @@
-'use strict';
+var hazy = require('../src/hazy')
 
-describe('Hazy', function() {
+exports.lang = function(test) {
+    test.expect(1);
+    test.ok(true, "this assertion should pass");
+    test.done();
 
-  it('should work and stuff', function() {
-    console.log('derp')
-    expect(true).toBe(true)
-  })
+    // expressions
 
-})
+    // |
+    // :
+    // ~
+    // @
+    // *
+
+    // process
+}
+
+exports.fixture = function(test) {
+    test.expect(1);
+    test.ok(true, "this assertion should pass");
+    test.done();
+
+    // get
+    // all
+    // register
+    // process
+    // query
+    // load
+}
+
+exports.matcher = function(test) {
+    test.expect(1);
+    test.ok(true, "this assertion should pass");
+    test.done();
+
+    // config
+    // matches
+    // hasMatch
+    // search
+    // process
+    // processDeep
+}
