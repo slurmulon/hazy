@@ -284,6 +284,59 @@ sleepyDog.bark()
 ```
 > now prints `zzzz, too tired`, overriding the matcher defined at a higher context level (AKA `happyDog`'s) safely
 
+### Embedded Queries
+
+`jsonpath` queries can also be used as values in your JSON fixtures and will be embedded upon processing. The operator for embedded queries is:
+
+`|@<fixture-name>|`
+
+where `<fixture-name>` is the name of any fixture currently in the fixture pool.
+
+> **Note:** Embedded queries are **not** and cannot be lazily evaluated because:
+>
+> 1. High risk of cyclic dependencies and recursion (e.g., some fixtures may need to be lazily evaluated if they have not already been)
+> 2. Applying queries to pre-processed fixtures allows for cleaner queries (since you can query against Hazy tags) and provides consistent results.
+>    If queries were applied to post-processed fixtures, they would be bottlenecked to only working with properties since the processed random values 
+>    are obviously inconsistent.
+
+Use of the operator is straight forward:
+
+```javascript
+hazy.fixture.register('someShark', {
+  id   : '|~misc:guid|',
+  name : 'Tiger Shark',
+  born : '|@simpleDate|',
+  ate  : '|* $.id|', // queries pool for any fixture with a "name" property at the highest level
+})
+```
+this will result with something like:
+
+{ 
+  id: '64af61f8-daa8-5959-8be4-bdd536ecc5bd',
+  name: 'Tiger Shark',
+  owner: 'hax',
+  born: Tue Jun 07 2067 10:13:50 GMT-0700 (PDT),
+  ate: 
+    [ {
+        id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
+        name: 'Mrs. Cornelia Warner Agnes Hammond',
+        bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
+        ssn: '264-66-4154 (not really)'
+      },
+      { id: '427b2fa6-02f8-5be5-b3d1-cdf96f432e28',
+        name: 'Dawg',
+        owner: {
+          id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
+          name: 'Mrs. Cornelia Warner Agnes Hammond',
+          bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
+          ssn: '264-66-4154 (not really)'
+        }
+      } 
+    ] 
+}
+
+> **Note** the query operator currently always returns an `Array`. This is a limitation because it prevents you from being able to mixin with other operators. I hope to fix this soon.
+
 ## TODO
 
 - [ ] Repeaters
