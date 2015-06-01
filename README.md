@@ -117,7 +117,7 @@ The token for generating random data is `~`:
 
 ## Embedding
 
-Hazy supports lazy embedding of other JSON fixtures (or really any value) present in the fixture pool. The example above shows this already:
+Hazy supports embedding of other JSON fixtures (or really any value) present in the fixture pool. The example above shows this already:
 
 ```javascript
 hazy.fixture.register('someDog', {
@@ -177,13 +177,66 @@ After the fixture has been queried, this will result with:
 
 `e76de72e-6010-5140-a270-da7b6b6ad2d7`
 
----
+### Embedded Queries
+
+`jsonpath` expressions can also be used as query values in your JSON fixtures and will be embedded upon processing. The operator for embedded queries is:
+
+`|*<jsonpath-expression>|`
+
+where `<jsonpath-expression>` is a valid [jsonpath](http://goessner.net/articles/JsonPath/) expression
+
+> **Note:** Embedded queries are **not** and cannot be lazily evaluated because:
+>
+> 1. Very high risk of cyclic dependencies and infinite recursion (e.g., some fixtures may need to be lazily evaluated if they have not already been, potentially triggering an endless cycle)
+> 2. Applying queries to pre-processed fixtures allows for cleaner queries (since you can query against Hazy tags) and provides consistent results.
+>    If queries were applied to post-processed fixtures, they would be bottlenecked to only working with properties since the processed random values 
+>    are obviously inconsistent.
+
+Use of the operator is straight forward:
+
+```javascript
+hazy.fixture.register('someShark', {
+  id   : '|~misc:guid|',
+  name : 'Tiger Shark',
+  ate  : '|* $.id|', // queries pool for any fixture with a "name" property at the highest level
+})
+```
+this will result with something like:
+
+```javascript
+{ 
+  id: '64af61f8-daa8-5959-8be4-bdd536ecc5bd',
+  name: 'Tiger Shark',
+  ate: 
+    [ { 
+        id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
+        name: 'Mrs. Cornelia Warner Agnes Hammond',
+        bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
+        ssn: '264-66-4154 (not really)'
+      },
+      { 
+        id: '427b2fa6-02f8-5be5-b3d1-cdf96f432e28',
+        name: 'Dawg',
+        owner: {
+          id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
+          name: 'Mrs. Cornelia Warner Agnes Hammond',
+          bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
+          ssn: '264-66-4154 (not really)'
+        }
+      } 
+    ] 
+}
+```
+
+> **Note** the query operator currently always returns an `Array`. This is a limitation because it prevents you from being able to mixin with other operators. I hope to fix this soon.
+
+## Functional Queries
 
 With Hazy we can leverage this powerful query mechanism in any testing environment to provide test-specific
-functionality to your fixtures.
+and finely grained functionality to your fixtures.
 
-If we now wanted to query our fixture pool for any fixture with an `owner` object containing an `id` property,
-then we would use the following:
+For example, if we wanted to query our fixture pool for any fixture with an `owner` object containing an `id` property
+and then update those fixtures with new `bark()` functionality, then we would use the following:
 
 ```javascript
 hazy.matcher.config({
@@ -286,59 +339,6 @@ happyDog.bark()
 sleepyDog.bark()
 ```
 > now prints `zzzz, too tired`, overriding the matcher defined at a higher context level (AKA `happyDog`'s) safely
-
-### Embedded Queries
-
-`jsonpath` expressions can also be used as query values in your JSON fixtures and will be embedded upon processing. The operator for embedded queries is:
-
-`|*<jsonpath-expression>|`
-
-where `<jsonpath-expression>` is a valid [jsonpath](http://goessner.net/articles/JsonPath/) expression
-
-> **Note:** Embedded queries are **not** and cannot be lazily evaluated because:
->
-> 1. Very high risk of cyclic dependencies and infinite recursion (e.g., some fixtures may need to be lazily evaluated if they have not already been, potentially triggering an endless cycle)
-> 2. Applying queries to pre-processed fixtures allows for cleaner queries (since you can query against Hazy tags) and provides consistent results.
->    If queries were applied to post-processed fixtures, they would be bottlenecked to only working with properties since the processed random values 
->    are obviously inconsistent.
-
-Use of the operator is straight forward:
-
-```javascript
-hazy.fixture.register('someShark', {
-  id   : '|~misc:guid|',
-  name : 'Tiger Shark',
-  ate  : '|* $.id|', // queries pool for any fixture with a "name" property at the highest level
-})
-```
-this will result with something like:
-
-```javascript
-{ 
-  id: '64af61f8-daa8-5959-8be4-bdd536ecc5bd',
-  name: 'Tiger Shark',
-  ate: 
-    [ { 
-        id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-        name: 'Mrs. Cornelia Warner Agnes Hammond',
-        bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
-        ssn: '264-66-4154 (not really)'
-      },
-      { 
-        id: '427b2fa6-02f8-5be5-b3d1-cdf96f432e28',
-        name: 'Dawg',
-        owner: {
-          id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-          name: 'Mrs. Cornelia Warner Agnes Hammond',
-          bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
-          ssn: '264-66-4154 (not really)'
-        }
-      } 
-    ] 
-}
-```
-
-> **Note** the query operator currently always returns an `Array`. This is a limitation because it prevents you from being able to mixin with other operators. I hope to fix this soon.
 
 ## TODO
 
