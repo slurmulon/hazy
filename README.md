@@ -311,6 +311,7 @@ hazy.fixture.register('someShark', {
 ```
 this will result with something like:
 
+```javascript
 { 
   id: '64af61f8-daa8-5959-8be4-bdd536ecc5bd',
   name: 'Tiger Shark',
@@ -334,6 +335,7 @@ this will result with something like:
       } 
     ] 
 }
+```
 
 > **Note** the query operator currently always returns an `Array`. This is a limitation because it prevents you from being able to mixin with other operators. I hope to fix this soon.
 
