@@ -284,17 +284,17 @@ sleepyDog.bark()
 ```
 > now prints `zzzz, too tired`, overriding the matcher defined at a higher context level (AKA `happyDog`'s) safely
 
-### Embedded Queries
+### Embedded Queries/Expressions
 
-`jsonpath` queries can also be used as values in your JSON fixtures and will be embedded upon processing. The operator for embedded queries is:
+`jsonpath` expressions can also be used as query values in your JSON fixtures and will be embedded upon processing. The operator for embedded queries is:
 
-`|@<fixture-name>|`
+`|*<jsonpath-expression>|`
 
-where `<fixture-name>` is the name of any fixture currently in the fixture pool.
+where `<jsonpath-expression>` is a valid (jsonpath)[http://goessner.net/articles/JsonPath/] expression
 
 > **Note:** Embedded queries are **not** and cannot be lazily evaluated because:
 >
-> 1. High risk of cyclic dependencies and recursion (e.g., some fixtures may need to be lazily evaluated if they have not already been)
+> 1. Very high risk of cyclic dependencies and infinite recursion (e.g., some fixtures may need to be lazily evaluated if they have not already been, potentially triggering an endless cycle)
 > 2. Applying queries to pre-processed fixtures allows for cleaner queries (since you can query against Hazy tags) and provides consistent results.
 >    If queries were applied to post-processed fixtures, they would be bottlenecked to only working with properties since the processed random values 
 >    are obviously inconsistent.
@@ -305,7 +305,6 @@ Use of the operator is straight forward:
 hazy.fixture.register('someShark', {
   id   : '|~misc:guid|',
   name : 'Tiger Shark',
-  born : '|@simpleDate|',
   ate  : '|* $.id|', // queries pool for any fixture with a "name" property at the highest level
 })
 ```
@@ -315,7 +314,6 @@ this will result with something like:
 { 
   id: '64af61f8-daa8-5959-8be4-bdd536ecc5bd',
   name: 'Tiger Shark',
-  born: Tue Jun 07 2067 10:13:50 GMT-0700 (PDT),
   ate: 
     [ {
         id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
