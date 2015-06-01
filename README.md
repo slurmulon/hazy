@@ -16,7 +16,7 @@ Hazy lets developers describe test data in a generic fasion and allows for fixtu
 
 ### Design Goals
 
-* Non-invasive (retain all involved standards)
+* Non-invasive (retain all involved standards, especially JSON)
 * Unique and identifiable syntax
 * Convention based, interpreter agnostic
 * Pre-processed and optionally evaluated at run-time
@@ -79,41 +79,41 @@ is completely transparent.
 
 The token for generating random data is `~`:
 
-`|~...|`
+`|~<class>:<type>|`
 
 ### Random Data Tokens
 
 * `|~basic:<type>|`
 
-  where type can be `'bool', 'character', 'integer', 'natural', 'string'`
+  supports `'bool', 'character', 'integer', 'natural', 'string'`
 
 * `|~text:<type>|`
 
-  where type can be `'paragraph', 'sentence', 'syllable', 'word'`
+  supports `'paragraph', 'sentence', 'syllable', 'word'`
 
 * `|~person:<type>|`
 
-  where type can be `'age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix'`
+  supports `'age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix'`
 
 * `|~mobile:<type>|`
 
-  where type can be `'android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2'`
+  supports `'android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2'`
 
 * `|~web:<type>|`
 
-  where type can be `'color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'`
+  supports `'color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'`
 
 * `|~geo:<type>|`
 
-  where type can be `'address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'`
+  supports `'address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'`
 
 * `|~time:<type>|`
 
-  where type can be `'ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'`
+  supports `'ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'`
 
 * `|~misc:<type>|`
 
-  where type can be `'guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted'`
+  supports `'guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted'`
 
 ## Embedding
 
@@ -230,7 +230,7 @@ this will result with something like:
 
 > **Note** the query operator currently always returns an `Array`. This is a limitation because it prevents you from being able to mixin with other operators. I hope to fix this soon.
 
-## Functional Queries
+### Functional Queries
 
 With Hazy we can leverage this powerful query mechanism in any testing environment to provide test-specific
 and finely grained functionality to your fixtures.
@@ -342,5 +342,12 @@ sleepyDog.bark()
 
 ## TODO
 
+- [ ] Unit tests
 - [ ] Repeaters
 - [ ] Seeds and ranges for random data
+
+## Feedback
+
+Questions? Comments? All welcome: [me@madhax.io](mailto:me@madhax.io)
+
+Made with :heart: by MadHax &copy; 2015
