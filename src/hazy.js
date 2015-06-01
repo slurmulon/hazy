@@ -8,6 +8,7 @@ var _        = require('lodash'),
 
 var hazy = {}
 
+
 //    ___             __ _       
 //   / __\___  _ __  / _(_) __ _ 
 //  / /  / _ \| '_ \| |_| |/ _` |
@@ -42,6 +43,7 @@ hazy.meta = {
     } // TODO - support n, unique and weighted! very useful
   }
 }
+
 
 //    __                   
 //   / /  __ _ _ __   __ _ 
@@ -159,22 +161,6 @@ hazy.lang = {
   }
 }
 
-//    __                 _                 
-//   /__\ __ _ _ __   __| | ___  _ __ ___  
-//  / \/// _` | '_ \ / _` |/ _ \| '_ ` _ \ 
-// / _  \ (_| | | | | (_| | (_) | | | | | |
-// \/ \_/\__,_|_| |_|\__,_|\___/|_| |_| |_|
-//
-
-hazy.random = _.mapValues(hazy.meta.random.types, function(value, key) {
-  var hazyRandObj = {}
-  
-  _.forEach(value, function(v) {
-     hazyRandObj[v] = function() { return new Chance()[v]() }
-  })
-  
-  return hazyRandObj
-})
 
 //    ___ _      _                       
 //   / __(_)_  _| |_ _   _ _ __ ___  ___ 
@@ -256,6 +242,7 @@ hazy.fixture = {
     })
   }
 }
+
 
 //               _       _                   
 //   /\/\   __ _| |_ ___| |__   ___ _ __ ___ 
@@ -351,6 +338,25 @@ hazy.matcher = {
     return processedFixture
   }
 }
+
+
+//    __                 _                 
+//   /__\ __ _ _ __   __| | ___  _ __ ___  
+//  / \/// _` | '_ \ / _` |/ _ \| '_ ` _ \ 
+// / _  \ (_| | | | | (_| | (_) | | | | | |
+// \/ \_/\__,_|_| |_|\__,_|\___/|_| |_| |_|
+//
+
+hazy.random = _.mapValues(hazy.meta.random.types, function(value, key) {
+  var hazyRandObj = {}
+  
+  _.forEach(value, function(v) {
+     hazyRandObj[v] = function() { return new Chance()[v]() }
+  })
+  
+  return hazyRandObj
+})
+
 
 //    ___       _ _     _ 
 //   / __\_   _(_) | __| |
