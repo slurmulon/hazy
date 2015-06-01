@@ -290,7 +290,7 @@ sleepyDog.bark()
 
 `|*<jsonpath-expression>|`
 
-where `<jsonpath-expression>` is a valid (jsonpath)[http://goessner.net/articles/JsonPath/] expression
+where `<jsonpath-expression>` is a valid [jsonpath](http://goessner.net/articles/JsonPath/) expression
 
 > **Note:** Embedded queries are **not** and cannot be lazily evaluated because:
 >
