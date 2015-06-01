@@ -1,3 +1,5 @@
+require('blanket')
+
 var hazy   = require('../src/hazy'),
     should = require('should'),
     _      = require('lodash')
@@ -21,7 +23,7 @@ describe('lang', function() {
 
       it('should avoid expressions without operators', function() {
         var testStr   = 'avoid |@capture| avoid |naughty|'
-        var testMatch =  testStr.match(hazy.lang.expression.all)
+        var testMatch = testStr.match(hazy.lang.expression.all)
 
         '|@capture|'.should.equal(testMatch[0])
         testMatch.length.should.equal(1)
@@ -97,10 +99,47 @@ describe('lang', function() {
 
         hazy.fixture.get('testParent').child.should.equal('|@missingChild|')
       })
+
+      it('should be independent of whitespace', function() {
+        var testChild  = {role: 'child'},
+            testParent = {role: 'parent', child: '|@   testChild|'}
+
+        hazy.fixture.register('testChild', testChild)
+        hazy.fixture.register('testParent', testParent)
+
+        hazy.fixture.get('testParent').child.should.equal(testChild)
+      })
     })
 
     describe('*', function() {
-      
+      it('should embed fixtures matching the provided jsonpath pattern', function() {
+        var testFindMe1  = {id: '123'},
+            testFindMe2  = {id: '456'},
+            testAvoid1   = {bad: 'stuff'}, 
+            testSearcher = {allIds: '|*$.id|'}
+
+        hazy.fixture.register('testFindMe1', testFindMe1)
+        hazy.fixture.register('testFindMe2', testFindMe2)
+        hazy.fixture.register('testAvoid1', testAvoid1)
+        hazy.fixture.register('testSearcher', testSearcher)
+
+        var testFixture = hazy.fixture.get('testSearcher')
+
+        testFixture.allIds.should.containDeep([testFindMe1, testFindMe2])
+        testFixture.allIds.should.not.containDeep([testAvoid1])
+      })
+
+      it('should be independent of whitespace', function() {
+        var testFindMe   = {id: '123'},
+            testSearcher = {found: '|*  $.id|'}
+
+        hazy.fixture.register('testFindMe', testFindMe)
+        hazy.fixture.register('testSearcher', testSearcher)
+
+        var testFixture = hazy.fixture.get('testSearcher')
+
+        testFixture.found.should.containDeep([testFindMe])
+      })
     })
   })
 

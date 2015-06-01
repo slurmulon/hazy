@@ -29,6 +29,7 @@
   "devDependencies": {
     "browserify": "^10.2.3",
     "mocha": "~2.2.5",
-    "should": "~6.0.3"
+    "should": "~6.0.3",
+    "blanket": "~1.1.7"
   }
 }
