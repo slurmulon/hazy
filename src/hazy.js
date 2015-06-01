@@ -21,6 +21,10 @@ hazy.config = {
   debug: false,
   matcher: {
     use: true
+  },
+  errors: {
+    quiet: false,
+    soft: false
   }
 }
 
@@ -34,8 +38,8 @@ hazy.meta = {
       web    : ['color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'],
       geo    : ['address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'],
       time   : ['ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'],
-      misc   : ['guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted']
-    }
+      misc   : ['guid', 'hash', 'normal', 'radio', 'tv'] 
+    } // TODO - support n, unique and weighted! very useful
   }
 }
 
@@ -55,10 +59,9 @@ hazy.lang = {
   tokens: {
     // expression start/end
     "|": function(prev, next) { 
-      var isPrevToken    = this.validate(prev),
-          isNextTokenEnd = /\|/.test(next) 
+      var isNextTokenEnd = /\|/.test(next) 
 
-      if (isPrevToken || isNextTokenEnd) {
+      if (isNextTokenEnd) {
         throw hazy.lang.exception('Cannot define an empty expression')
       }
 
@@ -77,7 +80,7 @@ hazy.lang = {
     },
 
     // random data
-    "~": function(prev, next, rest) {
+    "~": function(prev, next) {
       var randProp   = next.split(':')[0],
           randVal    = next.split(':')[1],
           canUseProp = hazy.random.hasOwnProperty(randProp)
@@ -328,10 +331,9 @@ hazy.matcher = {
     var matcher = hazy.matcher.pool[pattern]
 
     if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
-      var matches = jsonPath.query(fixture, pattern),
-          handler = matcher.handler
+      var matches = jsonPath.query(fixture, pattern)
 
-      return handler(fixture, matches, pattern)
+      return matcher.handler(fixture, matches, pattern)
     } else {
       throw 'Match pattern does not apply to fixture or handler is not a function'
     }
