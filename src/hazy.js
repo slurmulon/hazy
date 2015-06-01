@@ -185,29 +185,29 @@ hazy.fixture = {
 
   // fetches a fixture from the pool and processes it if necessary
   get: function(key) {
-    var fixture     = this.pool[key],
-        hazyFixture = hazy.config.lazy && _.isFunction(fixture) ? fixture() : fixture // FIXME - laziness doesn't work with query, axe this
+    var fixture = this.pool[key]
 
     if (hazy.config.matcher.use) {
-      return hazy.matcher.processDeep(hazyFixture)
+      return hazy.matcher.processDeep(fixture)
     }
 
-    return hazyFixture
+    return fixture
   },
 
+  // lazily acquires a fixture from the pool, processing it only once
   lazyGet: _.memoize(function(key) {
     return hazy.fixture.get(key)
   }),
 
+  // fetches all fixtures from the pool and processes them if necessary
   all: function() {
-    return _.map(hazy.fixture.pool, function(v, k) {
-      return hazy.fixture.get(k)
+    return _.map(hazy.fixture.pool, function(fixture, name) {
+      return hazy.fixture.get(name)
     })
   },
 
   // registers a processable fixture into the fixture pool
   register: function(name, fixture, lazy) {
-    // this.pool[name] = (lazy ? lazy : hazy.config.lazy) ? function() { return hazy.fixture.process(fixture) } : this.process(fixture)
     this.pool[name] = this.process(fixture) // FIXME - wrap with a special lazy object opposed to just wrapping with a function, too ambiguous
   },
 

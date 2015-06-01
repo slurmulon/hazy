@@ -1,7 +1,7 @@
 {
   "name": "hazy",
   "version": "0.0.0",
-  "description": "Lazy JSON stubbing",
+  "description": "Lazy JSON fixtures",
   "main": "src/hazy.js",
   "scripts": {
     "test": "gulp test"
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "chance": "~0.7.5",
+    "glob": "^5.0.10",
     "jsonpath": "^0.1.4",
     "lodash": "~3.9.3"
   },
