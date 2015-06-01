@@ -1,5 +1,6 @@
 var hazy   = require('../src/hazy'),
-    should = require('should')
+    should = require('should'),
+    _      = require('lodash')
 
 describe('lang', function() {
   var hazyStub
@@ -63,7 +64,16 @@ describe('lang', function() {
     })
 
     describe('~', function() {
-      
+      it('should categorically interface to ChanceJS', function() {
+        _.forEach(hazy.meta.random.types, function(subTypes, type) {
+          _.forEach(subTypes, function(subType) {
+            var randExp = type + ':' + subType,
+                randRes = hazy.lang.tokens['~'](null, randExp)
+
+            randRes.should.not.be.undefined  
+          })
+        })
+      })
     })
 
     describe('@', function() {

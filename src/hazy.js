@@ -34,8 +34,8 @@ hazy.meta = {
       web    : ['color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'],
       geo    : ['address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'],
       time   : ['ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'],
-      misc   : ['guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted']
-    }
+      misc   : ['guid', 'hash', 'normal', 'radio', 'tv'] 
+    } // TODO - support n, unique and weighted! very useful
   }
 }
 
@@ -76,7 +76,7 @@ hazy.lang = {
     },
 
     // random data
-    "~": function(prev, next, rest) {
+    "~": function(prev, next) {
       var randProp   = next.split(':')[0],
           randVal    = next.split(':')[1],
           canUseProp = hazy.random.hasOwnProperty(randProp)
