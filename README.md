@@ -68,6 +68,7 @@ The processed fixtures result as follows:
     ssn: '264-66-4154 (not really)'
   }
 }
+```
 
 ### Installation
 
