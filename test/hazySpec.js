@@ -151,7 +151,43 @@ describe('lang', function() {
 describe('fixture', function() {
 
   describe('get()', function() {
+    it('should return fixture in pool if it exists, and match the fixture against the matcher pool based on config', function() {
+      hazy.config.matcher.use = true
 
+      var testFixture = {id: '|~misc:guid|'}
+      var testMatcher = hazy.matcher.config({
+        path    : '$.id',
+        handler : function(fixture) {
+          fixture.matched = true
+          return fixture
+        }
+      })
+
+      hazy.fixture.register('theKey', testFixture)
+
+      var result = hazy.fixture.get('theKey')
+
+      result.matched.should.be.true
+    })
+
+    it('should return fixture in pool if it exists, and NOT match the fixture against the matcher pool based on config', function() {
+      hazy.config.matcher.use = false
+      
+      var testFixture = {id: '|~misc:guid|'}
+      var testMatcher = hazy.matcher.config({
+        path    : '$.id',
+        handler : function(fixture) {
+          fixture.matched = true
+          return fixture
+        }
+      })
+
+      hazy.fixture.register('theKey', testFixture)
+
+      var result = hazy.fixture.get('theKey')
+
+      should.not.exist(result.matched)
+    })
   })
 
   describe('all()', function() {
