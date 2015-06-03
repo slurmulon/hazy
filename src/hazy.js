@@ -108,7 +108,7 @@ hazy.lang = {
 
     // query and embed fixture
     "*": function(prev, next) {
-      return hazy.fixture.query(next.trim())
+      return hazy.fixture.query(next.trim())//, false)
     },
 
     // TODO - / escape character
@@ -196,8 +196,19 @@ hazy.fixture = {
   },
 
   // registers a processable fixture into the fixture pool
-  register: function(name, fixture, lazy) {
+  register: function(name, fixture) {
     this.pool[name] = this.process(fixture) // FIXME - wrap with a special lazy object opposed to just wrapping with a function, too ambiguous
+  },
+
+  // registers an array of processable fixtures into the fixture pool
+  registerAll: function(fixtureMap) {
+    if (_.isObject(fixtureMap)) {
+      _.each(fixtureMap, function(fixture, name) {
+        hazy.fixture.register(name, fixture)
+      })
+    } else {
+      throw 'Fixture map following {name: fixture} must be provided'
+    }
   },
 
    // dynamically process fixture values by type (object, string, array, or function)
@@ -224,9 +235,16 @@ hazy.fixture = {
     return processedFixture
   },
 
-  // queries the fixture pool for anything that matches the jsonpath pattern
-  query: function(pattern) {
-    return hazy.matcher.search(pattern)
+  // processes each fixture in the array
+  processAll: function(fixtures) {
+    return _.map(fixtures, function(fixture) {
+      return hazy.fixture.process(fixture)
+    })
+  },
+
+  // queries the fixture pool for anything that matches the jsonpath pattern and processes it
+  query: function(pattern, match) {
+    return hazy.matcher.search(pattern, match)
   },
 
   // load and register a fixture from files matching a glob pattern
@@ -240,6 +258,16 @@ hazy.fixture = {
         hazy.fixture.register(file.name, JSON.parse(file))
       })
     })
+  },
+
+  // removes a fixture by name from the pool
+  remove: function(name) {
+    delete this.pool[name]
+  },
+
+  // removes all fixtures from the pool
+  removeAll: function() {
+    this.pool = {}
   }
 }
 
@@ -298,7 +326,7 @@ hazy.matcher = {
   },
 
   // search the fixture pool for fixtures matching a specific pattern (intentionally non-lazy- prone to recursion hell and there's also little benefit in evaluating random values)
-  search: function(pattern) {
+  search: function(pattern, process) {
     var fixtures = _.values(hazy.fixture.pool) 
 
     return _(fixtures)
@@ -306,6 +334,11 @@ hazy.matcher = {
         var jpMatches = jsonPath.query(fixture, pattern)
 
         if (!_.isEmpty(jpMatches)) {
+          // process functional matches if desired
+          if (_.isUndefined(process) ? hazy.config.matcher.use : process) {
+            return hazy.matcher.process(pattern, fixture)
+          }
+
           return fixture
         }
       })
@@ -313,17 +346,22 @@ hazy.matcher = {
       .value()
   },
 
-  // executes a single pattern matcher handler on a fixture
+  // executes a single pattern matcher handler on a fixture.
+  // passive. does not consider non-matching patterns an error unless the matcher is corrupt
   process: function(pattern, fixture) {
     var matcher = hazy.matcher.pool[pattern]
 
-    if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
-      var matches = jsonPath.query(fixture, pattern)
+    if (matcher) {
+      if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
+        var matches = jsonPath.query(fixture, pattern)
 
-      return matcher.handler(fixture, matches, pattern)
-    } else {
-      throw 'Match pattern does not apply to fixture or handler is not a function'
+        return matcher.handler(fixture, matches, pattern)
+      } else {
+        throw 'Match pattern does not apply to fixture or handler is not a function'
+      }
     }
+
+    return fixture
   },
 
   // executes handlers for all pattern matches on a fixture
