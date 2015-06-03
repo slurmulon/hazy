@@ -19,11 +19,15 @@ describe('lang', function() {
     hazyStub = hazy.fork()
   })
 
+  afterEach(function() {
+    hazyStub.fixture.removeAll()
+  })
+
   describe('expressions', function() {
     describe('all', function() {
       it('should match all expressions defined by two | (start/end) tokens and an operator in each case', function() {
         var testStr   = 'avoid |@capture1| avoid |@capture2|'
-        var testMatch = testStr.match(hazy.lang.expression.all)
+        var testMatch = testStr.match(hazyStub.lang.expression.all)
 
         '|@capture1|'.should.equal(testMatch[0])
         '|@capture2|'.should.equal(testMatch[1])
@@ -31,7 +35,7 @@ describe('lang', function() {
 
       it('should avoid expressions without operators', function() {
         var testStr   = 'avoid |@capture| avoid |naughty|'
-        var testMatch = testStr.match(hazy.lang.expression.all)
+        var testMatch = testStr.match(hazyStub.lang.expression.all)
 
         '|@capture|'.should.equal(testMatch[0])
         testMatch.length.should.equal(1)
@@ -39,7 +43,7 @@ describe('lang', function() {
 
       it('should avoid empty expressions', function() {
         var testStr   = 'naughty || naughty'
-        var testMatch =  testStr.match(hazy.lang.expression.all) === null
+        var testMatch =  testStr.match(hazyStub.lang.expression.all) === null
 
         testMatch.should.be.true
       })
@@ -50,25 +54,25 @@ describe('lang', function() {
     describe('|', function() {
       it('should do nothing unless the next token is a |', function() {
         (function(){
-          hazy.lang.tokens['|'](null, 'anything')
+          hazyStub.lang.tokens['|'](null, 'anything')
         }).should.not.throw();
 
         (function(){
-         hazy.lang.tokens['|'](null, '|')
+         hazyStub.lang.tokens['|'](null, '|')
         }).should.throw();
       })
     })
 
     describe(':', function() {
       it('should access the "next" property of the "prev" match', function() {
-        var testAccessor = hazy.lang.tokens[':']({test: 'works'}, 'test')
+        var testAccessor = hazyStub.lang.tokens[':']({test: 'works'}, 'test')
 
         testAccessor.should.equal('works')
       })
 
       it('should throw an exception if there is no "prev" match', function() {
         (function(){
-         hazy.lang.tokens[':'](null, ':')
+         hazyStub.lang.tokens[':'](null, ':')
         }).should.throw()
       })
     })
@@ -78,12 +82,14 @@ describe('lang', function() {
         _.forEach(hazy.meta.random.types, function(subTypes, type) {
           _.forEach(subTypes, function(subType) {
             var randExp = type + ':' + subType,
-                randRes = hazy.lang.tokens['~'](null, randExp)
+                randRes = hazyStub.lang.tokens['~'](null, randExp)
 
             randRes.should.not.be.undefined  
           })
         })
       })
+
+      // TODO - it('should replace valid tokens with appropriate random values')
     })
 
     describe('@', function() {
@@ -91,10 +97,10 @@ describe('lang', function() {
         var testChild  = {role: 'child'},
             testParent = {role: 'parent', child: '|@testChild|'}
 
-        hazy.fixture.register('testChild', testChild)
-        hazy.fixture.register('testParent', testParent)
+        hazyStub.fixture.register('testChild', testChild)
+        hazyStub.fixture.register('testParent', testParent)
 
-        hazy.fixture.get('testParent').child.should.equal(testChild)
+        hazyStub.fixture.get('testParent').child.should.equal(testChild)
       })
 
       // FIXME - should probably make this replace value with 'undefined' instead of leaving an untouched token
@@ -102,20 +108,20 @@ describe('lang', function() {
         var testChild  = {role: 'child'},
             testParent = {role: 'parent', child: '|@missingChild|'}
 
-        hazy.fixture.register('testChild', testChild)
-        hazy.fixture.register('testParent', testParent)
+        hazyStub.fixture.register('testChild', testChild)
+        hazyStub.fixture.register('testParent', testParent)
 
-        hazy.fixture.get('testParent').child.should.equal('|@missingChild|')
+        hazyStub.fixture.get('testParent').child.should.equal('|@missingChild|')
       })
 
       it('should be independent of whitespace', function() {
         var testChild  = {role: 'child'},
             testParent = {role: 'parent', child: '|@   testChild|'}
 
-        hazy.fixture.register('testChild', testChild)
-        hazy.fixture.register('testParent', testParent)
+        hazyStub.fixture.register('testChild', testChild)
+        hazyStub.fixture.register('testParent', testParent)
 
-        hazy.fixture.get('testParent').child.should.equal(testChild)
+        hazyStub.fixture.get('testParent').child.should.equal(testChild)
       })
     })
 
@@ -126,12 +132,12 @@ describe('lang', function() {
             testAvoid1   = {bad: 'stuff'}, 
             testSearcher = {allIds: '|*$.id|'}
 
-        hazy.fixture.register('testFindMe1', testFindMe1)
-        hazy.fixture.register('testFindMe2', testFindMe2)
-        hazy.fixture.register('testAvoid1', testAvoid1)
-        hazy.fixture.register('testSearcher', testSearcher)
+        hazyStub.fixture.register('testFindMe1', testFindMe1)
+        hazyStub.fixture.register('testFindMe2', testFindMe2)
+        hazyStub.fixture.register('testAvoid1', testAvoid1)
+        hazyStub.fixture.register('testSearcher', testSearcher)
 
-        var testFixture = hazy.fixture.get('testSearcher')
+        var testFixture = hazyStub.fixture.get('testSearcher')
 
         testFixture.allIds.should.containDeep([testFindMe1, testFindMe2])
         testFixture.allIds.should.not.containDeep([testAvoid1])
@@ -141,10 +147,10 @@ describe('lang', function() {
         var testFindMe   = {id: '123'},
             testSearcher = {found: '|*  $.id|'}
 
-        hazy.fixture.register('testFindMe', testFindMe)
-        hazy.fixture.register('testSearcher', testSearcher)
+        hazyStub.fixture.register('testFindMe', testFindMe)
+        hazyStub.fixture.register('testSearcher', testSearcher)
 
-        var testFixture = hazy.fixture.get('testSearcher')
+        var testFixture = hazyStub.fixture.get('testSearcher')
 
         testFixture.found.should.containDeep([testFindMe])
       })
@@ -165,13 +171,22 @@ describe('lang', function() {
 //
 
 describe('fixture', function() {
+  var hazyStub
+
+  beforeEach(function() {
+    hazyStub = hazy.fork()
+  })
+
+  afterEach(function() {
+    hazyStub.fixture.removeAll()
+  })
 
   describe('get()', function() {
-    it('should return fixture in pool if it exists, and match the fixture against the matcher pool based on config', function() {
-      hazy.config.matcher.use = true
+    it('should return fixture in pool if it exists and match the fixture against the matcher pool based on config', function() {
+      hazyStub.config.matcher.use = true
 
       var testFixture = {id: '|~misc:guid|'}
-      var testMatcher = hazy.matcher.config({
+      var testMatcher = hazyStub.matcher.config({
         path    : '$.id',
         handler : function(fixture) {
           fixture.matched = true
@@ -179,18 +194,18 @@ describe('fixture', function() {
         }
       })
 
-      hazy.fixture.register('theKey', testFixture)
+      hazyStub.fixture.register('theKey', testFixture)
 
-      var result = hazy.fixture.get('theKey')
+      var result = hazyStub.fixture.get('theKey')
 
       result.matched.should.be.true
     })
 
-    it('should return fixture in pool if it exists, and NOT match the fixture against the matcher pool based on config', function() {
-      hazy.config.matcher.use = false
+    it('should return fixture in pool if it exists without performing any matching based on the config', function() {
+      hazyStub.config.matcher.use = false
       
       var testFixture = {id: '|~misc:guid|'}
-      var testMatcher = hazy.matcher.config({
+      var testMatcher = hazyStub.matcher.config({
         path    : '$.id',
         handler : function(fixture) {
           fixture.matched = true
@@ -198,19 +213,57 @@ describe('fixture', function() {
         }
       })
 
-      hazy.fixture.register('theKey', testFixture)
+      hazyStub.fixture.register('theKey', testFixture)
 
-      var result = hazy.fixture.get('theKey')
+      var result = hazyStub.fixture.get('theKey')
 
       should.not.exist(result.matched)
     })
   })
 
   describe('all()', function() {
-    
+    beforeEach(function() {
+      hazyStub = hazy.fork()
+
+      hazyStub.matcher.config({
+        path    : '$.id',
+        handler : function(fixture) {
+          fixture.matched = true
+          return fixture
+        }
+      })
+      
+      hazyStub.fixture.registerAll({'first': {id: '|~misc:guid|'}, 'second': {id: '|~misc:guid|'}})
+    })
+
+    it('should return all fixtures in the pool, matching any that exist against the matcher pool based based on config', function() {
+      hazyStub.config.matcher.use = true
+
+      var results = hazyStub.fixture.query('$.id')
+
+      results.length.should.eql(2)
+      results.should.matchEach(function(r) { return r.matched.should.be.true })
+    })
+
+    it('should return all fixtures in the pool without performing any matching based on the config', function() {
+      hazyStub.config.matcher.use = false
+
+      var results = hazyStub.fixture.query('$.id')
+
+      results.length.should.eql(2)
+      results.should.matchEach(function(r) { return r.should.not.have.property('matched') })
+    })
   })
 
   describe('register()', function() {
+    // TODO - it('should wrap incoming fixtures with a special lazy object when specified')
+
+    it('should process incoming fixtures and place them into the fixture pool', function() {
+      
+    })
+  })
+
+  describe('registerAll()', function() {
     
   })
 
