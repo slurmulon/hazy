@@ -19,10 +19,6 @@ describe('lang', function() {
     hazyStub = hazy.fork()
   })
 
-  afterEach(function() {
-    hazyStub.fixture.removeAll()
-  })
-
   describe('expressions', function() {
     describe('all', function() {
       it('should match all expressions defined by two | (start/end) tokens and an operator in each case', function() {
@@ -259,7 +255,7 @@ describe('fixture', function() {
     // TODO - it('should wrap incoming fixtures with a special lazy object when specified')
 
     it('should process incoming fixtures and place them into the fixture pool', function() {
-      
+
     })
   })
 
