@@ -1,6 +1,6 @@
 # Hazy
 
-Lazy and light-weight JSON fixtures in Node
+> Lazy and light-weight JSON fixtures in Node
 
 -----
 
@@ -22,7 +22,7 @@ Hazy lets developers describe test data in a generic fasion and allows for fixtu
 * Pre-processed and optionally evaluated at run-time
 * Cleanly integrate with __all__ testing frameworks
 
-### Examples
+### Example
 
 Here we register a couple of Hazy fixtures into what's refered to as the fixture pool:
 
@@ -76,6 +76,29 @@ The processed fixtures result as follows:
 > git clone http://github.com/slurmulon/hazy.git
 > npm link hazy
 ```
+
+### Test
+
+```
+> cd hazy
+```
+
+then
+
+```
+> npm test
+```
+
+or
+
+```
+> mocha
+```
+
+# Documentation
+
+The following provides a high-level summary of all of Hazy's features as well as some examples and gotchas.
+As of now more detailed documention does not exist (coming soon).
 
 ## Randomness
 
@@ -350,9 +373,9 @@ sleepyDog.bark()
 
 ## TODO
 
-- [ ] Unit tests
-- [ ] Repeaters
+- [ ] Repeater operator
 - [ ] Seeds and ranges for random data
+- [ ] Token parameters
 
 ## Feedback
 
