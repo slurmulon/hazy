@@ -36,11 +36,13 @@ hazy.fixture.register('someDude', {
   ssn  : '|~person:ssn| (not really)',
 })
 
-hazy.fixture.register('someDog', {
+/* loads someDog.json, containing:
+{
   id    : '|~misc:guid|',
   name  : 'Dawg',
   owner : '|@someDude|'
-})
+}*/
+hazy.fixture.load('someDog')
 
 var hazyDude = hazy.fixture.get('someDude')
 var hazyDog  = hazy.fixture.get('someDog')
