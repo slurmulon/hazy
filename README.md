@@ -378,9 +378,3 @@ sleepyDog.bark()
 - [ ] Repeater operator
 - [ ] Seeds and ranges for random data
 - [ ] Token parameters
-
-## Feedback
-
-Questions? Comments? All welcome: [me@madhax.io](mailto:me@madhax.io)
-
-Made with :heart: by MadHax &copy; 2015
