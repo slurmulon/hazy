@@ -182,6 +182,10 @@ describe('fixture', () => {
   })
 
   describe('get()', () => {
+    it('should be a defined method', () => {
+      hazyStub.fixture.get.should.be.a('function')
+    })
+
     it('should return fixture in pool if it exists and match the fixture against the matcher pool based on config', () => {
       hazyStub.config.matcher.use = true
 
@@ -201,13 +205,13 @@ describe('fixture', () => {
       result.matched.should.be.true
     })
 
-    xit('should return fixture in pool if it exists without performing any matching based on the config', () => {
+    it('should return fixture in pool if it exists without performing any matching based on the config', () => {
       hazyStub.config.matcher.use = false
       
       const testFixture = {id: '|~misc:guid|'}
       const testMatcher = hazyStub.matcher.config({
         path    : '$.id',
-        handler : function(fixture) {
+        handler : (fixture) => {
           fixture.matched = true
           return fixture
         }
@@ -217,7 +221,7 @@ describe('fixture', () => {
 
       const result = hazyStub.fixture.get('theKey')
 
-      should.not.exist(result.matched)
+      result.should.not.have.property('matched')
     })
   })
 
@@ -234,6 +238,10 @@ describe('fixture', () => {
       })
       
       hazyStub.fixture.registerAll({'first': {id: '|~misc:guid|'}, 'second': {id: '|~misc:guid|'}})
+    })
+
+    it('should be a defined method', () => {
+      hazyStub.fixture.all.should.be.a('function')
     })
 
     it('should return all fixtures in the pool, matching any that exist against the matcher pool based based on config', () => {
@@ -255,28 +263,47 @@ describe('fixture', () => {
     })
   })
 
-  xdescribe('register()', () => {
+  describe('register()', () => {
+    it('should be a defined method', () => {
+      hazyStub.fixture.register.should.be.a('function')
+    })
     // TODO - it('should wrap incoming fixtures with a special lazy object when specified')
 
-    it('should process incoming fixtures and place them into the fixture pool', () => {
+    xit('should process incoming fixtures and place them into the fixture pool', () => {
 
     })
   })
 
   describe('registerAll()', () => {
-    
+    it('should be a defined method', () => {
+      hazyStub.fixture.registerAll.should.be.a('function')
+    })
+
+    // TODO
   })
 
   describe('process()', () => {
-    
+    it('should be a defined method', () => {
+      hazyStub.fixture.process.should.be.a('function')
+    })
+
+    // TODO
   })
 
   describe('query()', () => {
-    
+    it('should be a defined method', () => {
+      hazyStub.fixture.query.should.be.a('function')
+    })
+
+    // TODO
   })
 
   describe('load()', () => {
-    
+    it('should be a defined method', () => {
+      hazyStub.fixture.load.should.be.a('function')
+    })
+
+    // TODO
   })
 })
 
@@ -312,5 +339,27 @@ describe('matcher', () => {
 
   describe('processDeep()', () => {
     
+  })
+})
+
+
+//    __                 _                 
+//   /__\ __ _ _ __   __| | ___  _ __ ___  
+//  / \/// _` | '_ \ / _` |/ _ \| '_ ` _ \ 
+// / _  \ (_| | | | | (_| | (_) | | | | | |
+// \/ \_/\__,_|_| |_|\__,_|\___/|_| |_| |_|
+//
+
+describe('random', () => {
+  xit('should map to the ChanceJS library', () => {
+
+  })
+
+  it('should return unique values each time a ChanceJS-based own property is accessed', () => {
+    const arbRandFunc = hazy.random.misc.guid
+    const arbRand1 = arbRandFunc()
+    const arbRand2 = arbRandFunc()
+
+    arbRand1.should.not.equal(arbRand2)
   })
 })
