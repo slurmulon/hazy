@@ -4,7 +4,10 @@
   "description": "Lazy JSON fixtures",
   "main": "src/hazy.js",
   "scripts": {
-    "test": "mocha"
+    "lint": "eslint src/hazy.js",
+    "start": "babel-node src/hazy.js",
+    "test": "mocha --reporter nyan --compilers js:babel/register test",
+    "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js"
   },
   "repository": {
     "type": "git",
@@ -21,15 +24,20 @@
     "url": "https://github.com/slurmulon/hazy/issues"
   },
   "dependencies": {
+    "babel": "^5.8.21",
     "chance": "~0.7.5",
     "glob": "^5.0.10",
     "jsonpath": "^0.1.4",
     "lodash": "~3.9.3"
   },
   "devDependencies": {
-    "browserify": "^10.2.3",
-    "mocha": "~2.2.5",
-    "should": "~6.0.3",
-    "blanket": "~1.1.7"
+    "babel-eslint": "^4.0.10",
+    "blanket": "~1.1.7",
+    "chai": "^3.2.0",
+    "chai-as-promised": "^5.1.0",
+    "chai-things": "^0.2.0",
+    "eslint": "^1.1.0",
+    "mocha": "^2.3.2",
+    "nodemon": "^1.4.1"
   }
 }

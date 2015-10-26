@@ -1,12 +1,18 @@
 'use strict';
 
-var _        = require('lodash'),
-    jsonPath = require('jsonpath'),
-    fs       = require('fs'),
-    glob     = require("glob"),
-    Chance   = require('chance')
+// var _        = require('lodash'),
+//     jsonPath = require('jsonpath'),
+//     fs       = require('fs'),
+//     glob     = require("glob"),
+//     Chance   = require('chance')
 
-var hazy = {}
+import _ from 'lodash'
+import jsonPath from 'jsonpath'
+import Chance from 'chance'
+import fs from 'fs'
+import glob from 'glob'
+
+let hazy = {}
 
 
 //    ___             __ _       
@@ -60,8 +66,8 @@ hazy.lang = {
 
   tokens: {
     // expression start/end
-    "|": function(prev, next) { 
-      var isNextTokenEnd = /\|/.test(next) 
+    '|': (prev, next) => {
+      const isNextTokenEnd = /\|/.test(next)
 
       if (isNextTokenEnd) {
         throw hazy.lang.exception('Cannot define an empty expression')
@@ -73,23 +79,23 @@ hazy.lang = {
     },
 
     // property separator / accessor
-    ":": function(prev, next) { // property accessor
+    ':': (prev, next) => { // property accessor
       if (!prev) {
-        throw 'Syntax error, : requires a left operand'
+        throw hazy.lang.exception('Syntax error, : requires a left operand')
       }
 
       return prev[next]
     },
 
     // random data
-    "~": function(prev, next) {
-      var randProp   = next.split(':')[0],
-          randVal    = next.split(':')[1],
-          canUseProp = hazy.random.hasOwnProperty(randProp)
+    '~': (prev, next) => {
+      const randProp   = next.split(':')[0],
+            randVal    = next.split(':')[1],
+            canUseProp = hazy.random.hasOwnProperty(randProp)
 
       if (canUseProp) {
-        var randObjByProp  = hazy.random[randProp],
-            randObjSubType = randVal // get property of random operator following ":"
+        const randObjByProp  = hazy.random[randProp],
+              randObjSubType = randVal // get property of random operator following ":"
 
         if (!randObjByProp || !randObjByProp[randObjSubType]) {
           throw hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported:', hazy.meta.random.types[randProp])
@@ -102,41 +108,32 @@ hazy.lang = {
     },
 
     // embed fixture
-    "@": function(prev, next) {
-      return hazy.fixture.get(next.trim())
-    },
+    '@': (prev, next) => hazy.fixture.get(next.trim()),
 
     // query and embed fixture
-    "*": function(prev, next) {
-      return hazy.fixture.query(next.trim())//, false)
-    },
+    '*': (prev, next) => hazy.fixture.query(next.trim()),//, false)
 
     // TODO - / escape character
-
     // TODO - ? random character
 
-    validate: function(token) {
-      return this.hasOwnProperty(token)
-    },
+    validate: (token) => hazy.lang.tokens.hasOwnProperty(token),
 
-    process: function(token, prev, next, rest) {
-      return _.bindKey(hazy.lang.tokens, token, prev, next, rest)()
-    }
+    process: (token, prev, next, rest) => _.bindKey(hazy.lang.tokens, token, prev, next, rest)()
   },
 
   // extracts tokens from strs and evaluates them. interpolates strings, ignores and simply returns other data types
-  process: function(str) {
-    var matches = str.split(hazy.lang.expression.all),
-        tokens  = []
+  process: (str) => {
+    const matches = str.split(hazy.lang.expression.all),
+          tokens  = []
 
-    _.forEach(matches, function(match, i) {
-      var isToken = hazy.lang.tokens.validate(match)
+    _.forEach(matches, (match, i) => {
+      const isToken = hazy.lang.tokens.validate(match)
 
       if (isToken) {
-        var prevMatch   = matches[i - 1],
-            nextMatch   = matches[i + 1],
-            restMatches = _.drop(matches, i + 1),
-            tokenResult = this.tokens.process(match, prevMatch, nextMatch, restMatches)
+        const prevMatch   = matches[i - 1],
+              nextMatch   = matches[i + 1],
+              restMatches = _.drop(matches, i + 1),
+              tokenResult = hazy.lang.tokens.process(match, prevMatch, nextMatch, restMatches)
 
         if (tokenResult) {
           // if processed token result is a string, substitute original string as we iterate
@@ -156,9 +153,7 @@ hazy.lang = {
     return str
   },
 
-  exception: function(msg) {
-    return '[Hazy syntax error] ' + msg
-  }
+  exception: (msg) => new Error('[Hazy syntax error] ' + msg)
 }
 
 
@@ -173,8 +168,8 @@ hazy.fixture = {
   pool: {},
 
   // fetches a fixture from the pool and processes it if necessary
-  get: function(key) {
-    var fixture = this.pool[key]
+  get: (key) => {
+    const fixture = hazy.fixture.pool[key]
 
     if (hazy.config.matcher.use) {
       return hazy.matcher.processDeep(fixture)
@@ -184,41 +179,33 @@ hazy.fixture = {
   },
 
   // lazily acquires a fixture from the pool, processing it only once
-  lazyGet: _.memoize(function(key) {
-    return hazy.fixture.get(key)
-  }),
+  lazyGet: _.memoize(key => hazy.fixture.get(key)),
 
   // fetches all fixtures from the pool and processes them if necessary
-  all: function() {
-    return _.map(hazy.fixture.pool, function(fixture, name) {
-      return hazy.fixture.get(name)
-    })
-  },
+  all: () => _.map(hazy.fixture.pool, (fixture, name) => hazy.fixture.get(name)),
 
   // registers a processable fixture into the fixture pool
-  register: function(name, fixture) {
-    this.pool[name] = this.process(fixture) // FIXME - wrap with a special lazy object opposed to just wrapping with a function, too ambiguous
+  register: (name, fixture) => {
+    hazy.fixture.pool[name] = hazy.fixture.process(fixture) // FIXME - wrap with a special lazy object opposed to just wrapping with a function, too ambiguous
   },
 
   // registers an array of processable fixtures into the fixture pool
-  registerAll: function(fixtureMap) {
+  registerAll: (fixtureMap) => {
     if (_.isObject(fixtureMap)) {
-      _.each(fixtureMap, function(fixture, name) {
-        hazy.fixture.register(name, fixture)
-      })
+      _.each(fixtureMap, (fixture, name) => hazy.fixture.register(name, fixture))
     } else {
-      throw 'Fixture map following {name: fixture} must be provided'
+      throw new Error('Fixture map following {name: fixture} must be provided')
     }
   },
 
    // dynamically process fixture values by type (object, string, array, or function)
-  process: function(fixture) {
-    var processedFixture = fixture
+  process: (fixture) => {
+    const processedFixture = fixture
 
     if (_.isPlainObject(fixture)) {
-      _.forEach(fixture, function(value, key) {
-        var processedKey = hazy.lang.process(key),
-            nextFixture  = value
+      _.forEach(fixture, (value, key) => {
+        const processedKey = hazy.lang.process(key),
+              nextFixture  = value
             
         processedFixture[processedKey] = hazy.fixture.process(nextFixture)
       })
@@ -236,38 +223,32 @@ hazy.fixture = {
   },
 
   // processes each fixture in the array
-  processAll: function(fixtures) {
-    return _.map(fixtures, function(fixture) {
-      return hazy.fixture.process(fixture)
-    })
-  },
+  processAll: (fixtures) => fixtures.map(fixture => hazy.fixture.process(fixture)),
 
   // queries the fixture pool for anything that matches the jsonpath pattern and processes it
-  query: function(pattern, match) {
-    return hazy.matcher.search(pattern, match)
-  },
+  query: (pattern, match) => hazy.matcher.search(pattern, match),
 
   // load and register a fixture from files matching a glob pattern
-  load: function(pattern, options) {
-    glob(pattern, options, function (err, files) {
+  load: (pattern, options) => {
+    glob(pattern, options, (err, files) => {
       if (err) {
-        throw 'Failed to load file'
+        throw new Error('Failed to load file')
       }
 
-      _.forEach(files, function(file) {
+      _.forEach(files, (file) => {
         hazy.fixture.register(file.name, JSON.parse(file))
       })
     })
   },
 
   // removes a fixture by name from the pool
-  remove: function(name) {
-    delete this.pool[name]
+  remove: (name) => {
+    delete hazy.fixture.pool[name]
   },
 
   // removes all fixtures from the pool
-  removeAll: function() {
-    this.pool = {}
+  removeAll: () => {
+    hazy.fixture.pool = {}
   }
 }
 
@@ -282,29 +263,29 @@ hazy.fixture = {
 hazy.matcher = {
   pool: {},
 
-  register: function(path, value) {
-    this.pool[path] = value
+  register: (path, value) => {
+    hazy.matcher.pool[path] = value
   },
 
-  config: function(config) {
-    var matcherPath    = config.path,
-        matcherHandler = config.handler
+  config: (config) => {
+    const matcherPath    = config.path,
+          matcherHandler = config.handler
 
-    if (this.pool[matcherPath]) {
-      delete this.pool[matcherPath]
+    if (hazy.matcher.pool[matcherPath]) {
+      delete hazy.matcher.pool[matcherPath]
     }
 
-    this.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
+    hazy.matcher.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
   },
 
   // provides a map of all matched patterns in a fixture (pattern as key)
-  matches: function(fixture) {
-    var matches = {}
+  matches: (fixture) => {
+    let matches = {}
 
     if (hazy.config.matcher.use) {
-      _.forEach(hazy.matcher.pool, function(v, pattern) {
+      _.forEach(hazy.matcher.pool, (v, pattern) => {
         if (_.isObject(fixture)) {
-          var jpMatches = jsonPath.query(fixture, pattern)
+          const jpMatches = jsonPath.query(fixture, pattern)
 
           if (!_.isEmpty(jpMatches)) {
             matches[pattern] = jpMatches
@@ -319,19 +300,17 @@ hazy.matcher = {
   },
 
   // determines if any matches in the pool apply to the fixture
-  hasMatch: function(fixture) {
-    return !_.isEmpty(
-      hazy.matcher.matches(fixture)
-    )
-  },
+  hasMatch: (fixture) => !_.isEmpty(
+    hazy.matcher.matches(fixture)
+  ),
 
   // search the fixture pool for fixtures matching a specific pattern (intentionally non-lazy- prone to recursion hell and there's also little benefit in evaluating random values)
-  search: function(pattern, process) {
-    var fixtures = _.values(hazy.fixture.pool) 
+  search: (pattern, process) => {
+    const fixtures = _.values(hazy.fixture.pool) 
 
     return _(fixtures)
-      .map(function(fixture) {
-        var jpMatches = jsonPath.query(fixture, pattern)
+      .map(fixture => {
+        const jpMatches = jsonPath.query(fixture, pattern)
 
         if (!_.isEmpty(jpMatches)) {
           // process functional matches if desired
@@ -348,12 +327,12 @@ hazy.matcher = {
 
   // executes a single pattern matcher handler on a fixture.
   // passive. does not consider non-matching patterns an error unless the matcher is corrupt
-  process: function(pattern, fixture) {
-    var matcher = hazy.matcher.pool[pattern]
+  process: (pattern, fixture) => {
+    const matcher = hazy.matcher.pool[pattern]
 
     if (matcher) {
       if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
-        var matches = jsonPath.query(fixture, pattern)
+        const matches = jsonPath.query(fixture, pattern)
 
         return matcher.handler(fixture, matches, pattern)
       } else {
@@ -365,11 +344,11 @@ hazy.matcher = {
   },
 
   // executes handlers for all pattern matches on a fixture
-  processDeep: function(fixture) {
-    var patternMatches   = this.matches(fixture)
-    var processedFixture = fixture
+  processDeep: (fixture) => {
+    const patternMatches = hazy.matcher.matches(fixture)
+    let processedFixture = fixture
 
-    _.forEach(patternMatches, function(match, pattern) {
+    _.forEach(patternMatches, (match, pattern) => {
       processedFixture = hazy.matcher.process(pattern, fixture) || processedFixture
     })
 
@@ -385,11 +364,11 @@ hazy.matcher = {
 // \/ \_/\__,_|_| |_|\__,_|\___/|_| |_| |_|
 //
 
-hazy.random = _.mapValues(hazy.meta.random.types, function(value, key) {
-  var hazyRandObj = {}
+hazy.random = _.mapValues(hazy.meta.random.types, (value, key) => {
+  let hazyRandObj = {}
   
-  _.forEach(value, function(v) {
-     hazyRandObj[v] = function() { return new Chance()[v]() }
+  _.forEach(value, v => {
+     hazyRandObj[v] = () => { return new Chance()[v]() } // FIXME - make not suck
   })
   
   return hazyRandObj
@@ -404,9 +383,7 @@ hazy.random = _.mapValues(hazy.meta.random.types, function(value, key) {
 //
 
 // creates a clone of the current hazy object (shallow, new memory references)
-hazy.fork = function() {
-  return _.clone(hazy, false)
-}
+hazy.fork = () => _.clone(hazy, false)
 
 // convenience reference to lodash so that developers don't have to explicitly import the lib in their own code
 hazy.util = _

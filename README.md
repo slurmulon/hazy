@@ -9,8 +9,8 @@ Hazy lets developers describe test data in a generic fasion and allows for fixtu
 
 ### Features
 
-* Lazy data matching in JSON fixtures
-* Lazy fixture embedding
+* Data matching in JSON fixtures
+* Dynamic fixture embedding
 * Lazy processing via run-time queries ([jsonpath](http://goessner.net/articles/JsonPath/))
 * Syntax layer integrating `ChanceJS` that provides a simple and non-intrusive interface
 
@@ -27,7 +27,7 @@ Hazy lets developers describe test data in a generic fasion and allows for fixtu
 Here we register a couple of Hazy fixtures into what's refered to as the fixture pool:
 
 ```javascript
-var hazy = require('hazy')
+import 'hazy' from hazy
 
 hazy.fixture.register('someDude', {
   id   : '|~misc:guid|',
@@ -44,8 +44,8 @@ hazy.fixture.register('someDude', {
 }*/
 hazy.fixture.load('someDog')
 
-var hazyDude = hazy.fixture.get('someDude')
-var hazyDog  = hazy.fixture.get('someDog')
+const hazyDude = hazy.fixture.get('someDude')
+const hazyDog  = hazy.fixture.get('someDog')
 ```
 
 The processed fixtures result as follows:
@@ -54,7 +54,7 @@ The processed fixtures result as follows:
 // hazyDude
 {
   id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-  name: 'Mrs. Cornelia Warner Agnes Hammond',
+  name: 'Mr. Cornelia Warner Agnes Hammond',
   bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
   ssn: '264-66-4154 (not really)'
 }
@@ -65,7 +65,7 @@ The processed fixtures result as follows:
   name: 'Dawg',
   owner: {
     id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-    name: 'Mrs. Cornelia Warner Agnes Hammond',
+    name: 'Mr. Cornelia Warner Agnes Hammond',
     bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
     ssn: '264-66-4154 (not really)'
   }
@@ -89,12 +89,6 @@ then
 
 ```
 > npm test
-```
-
-or
-
-```
-> mocha
 ```
 
 # Documentation
@@ -166,7 +160,7 @@ will resolve to the following provided that `someDude` is in the fixture pool
   name: 'Dawg',
   owner: {
     id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-    name: 'Mrs. Cornelia Warner Agnes Hammond',
+    name: 'Mr. Cornelia Warner Agnes Hammond',
     bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
     ssn: '264-66-4154 (not really)'
   }
@@ -193,7 +187,7 @@ Take our `someDog` fixture, for example:
   name: 'Dawg',
   owner: {
     id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-    name: 'Mrs. Cornelia Warner Agnes Hammond',
+    name: 'Mr. Cornelia Warner Agnes Hammond',
     bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
     ssn: '264-66-4154 (not really)'
   }
@@ -242,7 +236,7 @@ this will result with something like:
   ate: 
     [ { 
         id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-        name: 'Mrs. Cornelia Warner Agnes Hammond',
+        name: 'Mr. Cornelia Warner Agnes Hammond',
         bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
         ssn: '264-66-4154 (not really)'
       },
@@ -251,7 +245,7 @@ this will result with something like:
         name: 'Dawg',
         owner: {
           id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-          name: 'Mrs. Cornelia Warner Agnes Hammond',
+          name: 'Mr. Cornelia Warner Agnes Hammond',
           bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
           ssn: '264-66-4154 (not really)'
         }
@@ -272,11 +266,11 @@ and then update those fixtures with new `bark()` functionality, then we would us
 ```javascript
 hazy.matcher.config({
   path    : '$.owner.id',
-  handler : function(fixture, matches, pattern) {
+  handler : (fixture, matches, pattern) => {
     // return the fixture after mutating it (if you so desire)
     return _.extend(fixture, {
       hasOwner : true,
-      bark     : function() {
+      bark     : () => {
         console.log('woof woof, my owner is ', matches[0])
       }
     })  
@@ -294,7 +288,7 @@ hazy.fixture.register('someDogWithoutOwner', {
   name  : 'Lonely Dog'
 })
 
-var happyDog  = hazy.fixture.get('someDogWithOwner'),
+const happyDog  = hazy.fixture.get('someDogWithOwner'),
     lonelyDog = hazy.fixture.get('someDogWithoutOwner')
 ```
 
@@ -321,11 +315,11 @@ at a higher context level can be easily and safely overwritten in a Hazy fork:
 ```javascript
 hazy.matcher.config({
   path    : '$.owner.id',
-  handler : function(fixture, matches, pattern) {
+  handler : (fixture, matches, pattern) => {
     // return the fixture after mutating it (if you so desire)
     return _.extend(fixture, {
       hasOwner : true,
-      bark     : function() {
+      bark     : () => {
         console.log('woof woof, my owner is ', matches[0])
       }
     })  
@@ -338,16 +332,16 @@ hazy.fixture.register('someDogWithOwner', {
   owner : '|@someDude|'
 })
 
-var happyDog  = hazy.fixture.get('someDogWithOwner'),
+const happyDog  = hazy.fixture.get('someDogWithOwner'),
     sleepyDog = null
 
 function forkTest() {
-  var newHazy = hazy.fork()
+  const newHazy = hazy.fork()
 
   newHazy.matcher.config({
     path    : '$.owner.id',
-    handler : function(fixture) {
-      fixture.bark = function() {
+    handler : (fixture) => {
+      fixture.bark = () => {
         console.log('zzzz, too tired')
       }
       
@@ -378,3 +372,4 @@ sleepyDog.bark()
 - [ ] Repeater operator
 - [ ] Seeds and ranges for random data
 - [ ] Token parameters
+- [ ] Support queryl
