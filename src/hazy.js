@@ -1,10 +1,4 @@
-'use strict';
-
-// var _        = require('lodash'),
-//     jsonPath = require('jsonpath'),
-//     fs       = require('fs'),
-//     glob     = require("glob"),
-//     Chance   = require('chance')
+'use strict'
 
 import _ from 'lodash'
 import jsonPath from 'jsonpath'
@@ -111,7 +105,7 @@ hazy.lang = {
     '@': (prev, next) => hazy.fixture.get(next.trim()),
 
     // query and embed fixture
-    '*': (prev, next) => hazy.fixture.query(next.trim()),//, false)
+    '*': (prev, next) => hazy.fixture.query(next.trim()),
 
     // TODO - / escape character
     // TODO - ? random character
@@ -261,12 +255,15 @@ hazy.fixture = {
 //
 
 hazy.matcher = {
+  // source of all fixture matchers
   pool: {},
 
+  // registers a fixture pattern with a value into the matcher pool
   register: (path, value) => {
     hazy.matcher.pool[path] = value
   },
 
+  // registers a fixture pattern with an advanced config into the matcher pool
   config: (config) => {
     const matcherPath    = config.path,
           matcherHandler = config.handler
@@ -388,4 +385,5 @@ hazy.fork = () => _.clone(hazy, false)
 // convenience reference to lodash so that developers don't have to explicitly import the lib in their own code
 hazy.util = _
 
+// make the module accessible
 module.exports = hazy
