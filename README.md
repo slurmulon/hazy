@@ -373,3 +373,4 @@ sleepyDog.bark()
 - [ ] Seeds and ranges for random data
 - [ ] Token parameters
 - [ ] Support queryl
+- [ ] Remote fixtures via `http`
