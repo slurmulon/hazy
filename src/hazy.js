@@ -368,7 +368,7 @@ hazy.random = _.mapValues(hazy.meta.random.types, (value, key) => {
   let hazyRandObj = {}
   
   _.forEach(value, v => {
-     hazyRandObj[v] = () => new Chance()[v]() // FIXME - make not suck
+     hazyRandObj[v] = () => new Chance()[v]()
   })
   
   return hazyRandObj
