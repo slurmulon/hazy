@@ -103,7 +103,6 @@ hazy.lang = {
 
     // embed fixture from the pool
     '+': (prev, next) => hazy.fixture.get(next.trim()),
-    // '@': (prev, next) => hazy.fixture.get(next.trim()),
 
     // query and embed fixture from the pool
     '*': (prev, next) => hazy.fixture.query(next.trim()),
