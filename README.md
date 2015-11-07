@@ -265,8 +265,8 @@ and then update those fixtures with new `bark()` functionality, then we would us
 
 ```javascript
 hazy.matcher.config({
-  path    : '$.owner.id',
-  handler : (fixture, matches, pattern) => {
+  path   : '$.owner.id',
+  handle : (fixture, matches, pattern) => {
     // return the fixture after mutating it (if you so desire)
     return _.extend(fixture, {
       hasOwner : true,
@@ -288,8 +288,8 @@ hazy.fixture.register('someDogWithoutOwner', {
   name  : 'Lonely Dog'
 })
 
-const happyDog  = hazy.fixture.get('someDogWithOwner'),
-    lonelyDog = hazy.fixture.get('someDogWithoutOwner')
+const happyDog  = hazy.fixture.get('someDogWithOwner')
+const lonelyDog = hazy.fixture.get('someDogWithoutOwner')
 ```
 
 Since the `matcher` only applies to fixtures with an owner id, only `happyDog` will contain the `hasOwner` property and
@@ -314,8 +314,8 @@ at a higher context level can be easily and safely overwritten in a Hazy fork:
 
 ```javascript
 hazy.matcher.config({
-  path    : '$.owner.id',
-  handler : (fixture, matches, pattern) => {
+  path   : '$.owner.id',
+  handle : (fixture, matches, pattern) => {
     // return the fixture after mutating it (if you so desire)
     return _.extend(fixture, {
       hasOwner : true,
@@ -332,15 +332,15 @@ hazy.fixture.register('someDogWithOwner', {
   owner : '|@someDude|'
 })
 
-const happyDog  = hazy.fixture.get('someDogWithOwner'),
-    sleepyDog = null
+const happyDog  = hazy.fixture.get('someDogWithOwner')
+const sleepyDog = null
 
 function forkTest() {
   const newHazy = hazy.fork()
 
   newHazy.matcher.config({
-    path    : '$.owner.id',
-    handler : (fixture) => {
+    path   : '$.owner.id',
+    handle : (fixture) => {
       fixture.bark = () => {
         console.log('zzzz, too tired')
       }
