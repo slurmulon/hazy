@@ -54,8 +54,8 @@ hazy.meta = {
 
 hazy.lang = {
   expression: {
-    first : /\|(:|~|@|\*)(.*?)?\|/,
-    all   : /\|(:|~|@|\*)(.*?)?\|/g
+    first : /\|(:|~|>|_|\*|\+)(.*?)?\|/,
+    all   : /\|(:|~|>|_|\*|\+)(.*?)?\|/g
   },
 
   tokens: {
@@ -101,14 +101,20 @@ hazy.lang = {
       }
     },
 
-    // embed fixture
-    '@': (prev, next) => hazy.fixture.get(next.trim()),
+    // embed fixture from the pool
+    '+': (prev, next) => hazy.fixture.get(next.trim()),
+    // '@': (prev, next) => hazy.fixture.get(next.trim()),
 
-    // query and embed fixture
+    // query and embed fixture from the pool
     '*': (prev, next) => hazy.fixture.query(next.trim()),
 
-    // TODO - / escape character
-    // TODO - ? random character
+    // embed fixture from the filesystem
+    '>': (prev, next) => hazy.fixture.load(next.trim()),
+
+    // find and embed fixture from filesystem or pool
+    '_': (prev, next) => hazy.fixture.find(next.trim()),
+
+    // TODO - embed fixture from a remote URL ("@")
 
     validate: (token) => hazy.lang.tokens.hasOwnProperty(token),
 
@@ -199,7 +205,7 @@ hazy.fixture = {
   },
 
    // dynamically process fixture values by type (object, string, array, or function)
-  process: (fixture) => {
+  process: (fixture, match) => {
     const processedFixture = fixture
 
     if (_.isPlainObject(fixture)) {
@@ -217,6 +223,10 @@ hazy.fixture = {
     
     if (_.isArray(fixture)) {
       return fixture.map(hazy.fixture.process)
+    }
+
+    if (hazy.config.matcher.use && match) {
+      return hazy.matcher.processDeep(processedFixture)
     }
 
     return processedFixture
@@ -275,13 +285,13 @@ hazy.matcher = {
   // registers a fixture pattern with an advanced config into the matcher pool
   config: (config) => {
     const matcherPath    = config.path,
-          matcherHandler = config.handler
+          matcherHandler = config.handle
 
     if (hazy.matcher.pool[matcherPath]) {
       delete hazy.matcher.pool[matcherPath]
     }
 
-    hazy.matcher.pool[matcherPath] = {path: matcherPath, handler: matcherHandler}
+    hazy.matcher.pool[matcherPath] = {path: matcherPath, handle: matcherHandler}
   },
 
   // provides a map of all matched patterns in a fixture (pattern as key)
@@ -331,25 +341,25 @@ hazy.matcher = {
       .value()
   },
 
-  // executes a single pattern matcher handler on a fixture.
+  // executes a single pattern matcher handle on a fixture.
   // passive. does not consider non-matching patterns an error unless the matcher is corrupt
   process: (pattern, fixture) => {
     const matcher = hazy.matcher.pool[pattern]
 
     if (matcher) {
-      if (_.isObject(matcher) && _.isFunction(matcher.handler)) {
+      if (_.isObject(matcher) && _.isFunction(matcher.handle)) {
         const matches = jsonPath.query(fixture, pattern)
 
-        return matcher.handler(fixture, matches, pattern)
+        return matcher.handle(fixture, matches, pattern)
       } else {
-        throw 'Match pattern does not apply to fixture or handler is not a function'
+        throw 'Match pattern does not apply to fixture or handle is not a function'
       }
     }
 
     return fixture
   },
 
-  // executes handlers for all pattern matches on a fixture
+  // executes handles for all pattern matches on a fixture
   processDeep: (fixture) => {
     const patternMatches = hazy.matcher.matches(fixture)
     let processedFixture = fixture
@@ -360,6 +370,7 @@ hazy.matcher = {
 
     return processedFixture
   }
+
 }
 
 

@@ -26,18 +26,18 @@ describe('lang', () => {
   describe('expressions', () => {
     describe('all', () => {
       it('should match all expressions defined by two | (start/end) tokens and an operator in each case', () => {
-        const testStr   = 'avoid |@capture1| avoid |@capture2|'
+        const testStr   = 'avoid |+capture1| avoid |+capture2|'
         const testMatch = testStr.match(hazyStub.lang.expression.all)
 
-        '|@capture1|'.should.equal(testMatch[0])
-        '|@capture2|'.should.equal(testMatch[1])
+        '|+capture1|'.should.equal(testMatch[0])
+        '|+capture2|'.should.equal(testMatch[1])
       })
 
       it('should avoid expressions without operators', () => {
-        const testStr   = 'avoid |@capture| avoid |naughty|'
+        const testStr   = 'avoid |+capture| avoid |naughty|'
         const testMatch = testStr.match(hazyStub.lang.expression.all)
 
-        '|@capture|'.should.equal(testMatch[0])
+        '|+capture|'.should.equal(testMatch[0])
         testMatch.length.should.equal(1)
       })
 
@@ -92,10 +92,10 @@ describe('lang', () => {
       // TODO - it('should replace valid tokens with appropriate random values')
     })
 
-    describe('@', () => {
+    describe('+', () => {
       it('should embed fixtures with a matching name', () => {
         const testChild  = {role: 'child'},
-              testParent = {role: 'parent', child: '|@testChild|'}
+              testParent = {role: 'parent', child: '|+testChild|'}
 
         hazyStub.fixture.register('testChild', testChild)
         hazyStub.fixture.register('testParent', testParent)
@@ -106,17 +106,17 @@ describe('lang', () => {
       // FIXME - should probably make this replace value with 'undefined' instead of leaving an untouched token
       it('should ignore embed links with no matching names', () => {
         const testChild  = {role: 'child'},
-              testParent = {role: 'parent', child: '|@missingChild|'}
+              testParent = {role: 'parent', child: '|+missingChild|'}
 
         hazyStub.fixture.register('testChild', testChild)
         hazyStub.fixture.register('testParent', testParent)
 
-        hazyStub.fixture.get('testParent').child.should.equal('|@missingChild|')
+        hazyStub.fixture.get('testParent').child.should.equal('|+missingChild|')
       })
 
       it('should be independent of whitespace', () => {
         const testChild  = {role: 'child'},
-              testParent = {role: 'parent', child: '|@   testChild|'}
+              testParent = {role: 'parent', child: '|+   testChild|'}
 
         hazyStub.fixture.register('testChild', testChild)
         hazyStub.fixture.register('testParent', testParent)
@@ -155,6 +155,12 @@ describe('lang', () => {
         testFixture.found.should.deep.include(testFindMe)
       })
     })
+
+    describe('_', () => {
+      it('should find and embed fixtures from either the filepath (by glob) or fixture pool', () => {
+
+      })
+    })
   })
 
   describe('process()', () => {
@@ -191,8 +197,8 @@ describe('fixture', () => {
 
       const testFixture = {id: '|~misc:guid|'}
       const testMatcher = hazyStub.matcher.config({
-        path    : '$.id',
-        handler : function(fixture) {
+        path   : '$.id',
+        handle : (fixture) => {
           fixture.matched = true
           return fixture
         }
@@ -210,8 +216,8 @@ describe('fixture', () => {
       
       const testFixture = {id: '|~misc:guid|'}
       const testMatcher = hazyStub.matcher.config({
-        path    : '$.id',
-        handler : (fixture) => {
+        path   : '$.id',
+        handle : (fixture) => {
           fixture.matched = true
           return fixture
         }
@@ -230,8 +236,8 @@ describe('fixture', () => {
       hazyStub = hazy.fork()
 
       hazyStub.matcher.config({
-        path    : '$.id',
-        handler : function(fixture) {
+        path   : '$.id',
+        handle : (fixture) => {
           fixture.matched = true
           return fixture
         }
