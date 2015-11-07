@@ -175,6 +175,12 @@ hazy.fixture = {
   // lazily acquires a fixture from the pool, processing it only once
   lazyGet: _.memoize(key => hazy.fixture.get(key)),
 
+  // attempts to get a fixture from the pool. if that fails, the fixture is searched for on the file system.
+  find: (key) => hazy.fixture.get(key) || hazy.fixture.load(`${key}.json`),
+
+  // lazily finds a fixture, processing it only once
+  lazyFind: _.memoize(key => hazy.fixture.find(key)),
+
   // fetches all fixtures from the pool and processes them if necessary
   all: () => _.map(hazy.fixture.pool, (fixture, name) => hazy.fixture.get(name)),
 
@@ -210,7 +216,7 @@ hazy.fixture = {
     }
     
     if (_.isArray(fixture)) {
-      return _.map(fixture, hazy.fixture.process)
+      return fixture.map(hazy.fixture.process)
     }
 
     return processedFixture
@@ -223,14 +229,17 @@ hazy.fixture = {
   query: (pattern, match) => hazy.matcher.search(pattern, match),
 
   // load and register a fixture from files matching a glob pattern
-  load: (pattern, options) => {
+  // TODO - support root path configuration
+  load: (pattern, options, key) => {
     glob(pattern, options, (err, files) => {
       if (err) {
         throw new Error('Failed to load file')
       }
 
       _.forEach(files, (file) => {
-        hazy.fixture.register(file.name, JSON.parse(file))
+        const fixtureKey = key instanceof Function ? key(file.name) : file.name
+
+        hazy.fixture.register(fixtureKey, JSON.parse(file))
       })
     })
   },
