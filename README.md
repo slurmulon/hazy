@@ -39,8 +39,8 @@ hazy.fixture.register('someDude', {
 /* loads someDog.json, containing:
 {
   id    : '|~misc:guid|',
+  owner : '|+someDude|'
   name  : 'Dawg',
-  owner : '|@someDude|'
 }*/
 hazy.fixture.load('someDog')
 
@@ -147,8 +147,8 @@ Hazy supports embedding of other JSON fixtures (or really any value) present in 
 ```javascript
 hazy.fixture.register('someDog', {
   id    : '|~misc:guid|',
+  owner : '|+someDude|'
   name  : 'Dawg',
-  owner : '|@someDude|'
 })
 ```
 
@@ -172,8 +172,8 @@ in the next section.
 
 ## Queries
 
-Hazy utilizes `jsonpath` for defining functionality to pre-processed fixtures in a query-like fasion.
-Details on `jsonpath` can be found at http://goessner.net/articles/JsonPath/. There are many ways in which
+Hazy utilizes `JsonPath` for defining functionality to pre-processed fixtures in a query-like fasion.
+Details on `JsonPath` can be found at http://goessner.net/articles/JsonPath/. There are many ways in which
 JSON objects can be queried using this flexible technique.
 
 The general idea in Haze is to give developers both fine grained and generalized control over the data and
@@ -204,12 +204,12 @@ After the fixture has been queried, this will result with:
 
 ### Embedded Queries
 
-`jsonpath` expressions that match against the fixture pool can be specified with the query operator `*`.
+`JsonPath` expressions that match against the fixture pool can be specified with the query operator `*`.
 The results of the expression and will be embedded into the fixture upon processing. The syntax for embedded queries is:
 
 `|*<jsonpath-expression>|`
 
-where `<jsonpath-expression>` is a valid [jsonpath](http://goessner.net/articles/JsonPath/) expression
+where `<jsonpath-expression>` is a valid [JsonPath](http://goessner.net/articles/JsonPath/) expression
 
 > **Note:** Embedded queries are **not** and should not be lazily evaluated because:
 >
@@ -280,7 +280,7 @@ hazy.matcher.config({
 hazy.fixture.register('someDogWithOwner', {
   id    : '|~misc:guid|',
   name  : 'Happy Dog',
-  owner : '|@someDude|'
+  owner : '|+someDude|'
 })
 
 hazy.fixture.register('someDogWithoutOwner', {
@@ -329,7 +329,7 @@ hazy.matcher.config({
 hazy.fixture.register('someDogWithOwner', {
   id    : '|~misc:guid|',
   name  : 'Happy Dog',
-  owner : '|@someDude|'
+  owner : '|+someDude|'
 })
 
 const happyDog  = hazy.fixture.get('someDogWithOwner')
