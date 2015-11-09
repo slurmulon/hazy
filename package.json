@@ -6,6 +6,8 @@
   "scripts": {
     "lint": "eslint src/hazy.js",
     "start": "babel-node src/hazy.js",
+    "build": "babel src --out-dir lib",
+    "prepublish": "npm run build",
     "test": "mocha --reporter nyan --compilers js:babel/register test",
     "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js"
   },
