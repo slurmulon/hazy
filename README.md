@@ -30,10 +30,11 @@ Here we register a couple of Hazy fixtures into what's refered to as the fixture
 import 'hazy' from hazy
 
 hazy.fixture.register('someDude', {
-  id   : '|~misc:guid|',
-  name : '|~person:prefix| |~person:name|',
-  bday : '|~person:birthday|',
-  ssn  : '|~person:ssn| (not really)',
+  id    : '|~misc:guid|',
+  name  : '|~person:prefix| |~person:name|',
+  email : '|~web:email|',
+  bday  : '|~person:birthday|',
+  ssn   : '|~person:ssn| (not really)',
 })
 
 /* loads someDog.json, containing:
