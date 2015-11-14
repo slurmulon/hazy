@@ -4,13 +4,13 @@
   "description": "Lazy JSON fixtures",
   "main": "./lib/hazy",
   "scripts": {
-    "compile": "babel src --out-dir lib",
+    "build": "babel src --out-dir lib",
     "lint": "eslint src/hazy.js",
     "start": "babel-node src/hazy.js",
-    "pretest": "npm run compile",
+    "pretest": "npm run build",
     "test": "mocha --reporter nyan --compilers js:babel/register test",
     "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js",
-    "prepublish": "npm run compile"
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
