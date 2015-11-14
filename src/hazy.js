@@ -405,4 +405,4 @@ hazy.fork = () => _.clone(hazy, false)
 hazy.util = _
 
 // make the module accessible
-module.exports = hazy
+export default hazy

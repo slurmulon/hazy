@@ -1,6 +1,6 @@
 {
   "name": "hazy",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Lazy JSON fixtures",
   "main": "src/hazy.js",
   "scripts": {
@@ -18,7 +18,8 @@
   "keywords": [
     "hazy",
     "stub",
-    "json"
+    "json",
+    "fixtures"
   ],
   "author": "MadHax",
   "license": "MIT",
