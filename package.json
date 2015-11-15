@@ -32,7 +32,8 @@
     "chance": "~0.7.5",
     "glob": "^5.0.10",
     "jsonpath": "^0.1.4",
-    "lodash": "~3.9.3"
+    "lodash": "~3.9.3",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "babel-eslint": "^4.0.10",

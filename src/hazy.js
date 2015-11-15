@@ -4,6 +4,7 @@ import _ from 'lodash'
 import jsonPath from 'jsonpath'
 import Chance from 'chance'
 import fs from 'fs'
+import path from 'path'
 import glob from 'glob'
 
 let hazy = {}
@@ -83,8 +84,8 @@ hazy.lang = {
 
     // random data
     '~': (prev, next) => {
-      const randProp   = next.split(':')[0],
-            randVal    = next.split(':')[1],
+      const randProp   = new String(next.split(':')[0]).trim(),
+            randVal    = new String(next.split(':')[1]).trim(),
             canUseProp = hazy.random.hasOwnProperty(randProp)
 
       if (canUseProp) {
@@ -92,12 +93,14 @@ hazy.lang = {
               randObjSubType = randVal // get property of random operator following ":"
 
         if (!randObjByProp || !randObjByProp[randObjSubType]) {
-          throw hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported:', hazy.meta.random.types[randProp])
+          // throw hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported: ' + hazy.meta.random.types[randProp])
+          throw hazy.lang.exception(`Invalid random data type "${randObjSubType}". Supported: ` + JSON.stringify(hazy.meta.random.types[randProp]))
         }
 
         return randObjByProp[randObjSubType]()
       } else {
-        throw hazy.lang.exception('Invalid random data category "' + randProp + '". Supported', hazy.meta.random.types)
+        // throw hazy.lang.exception('Invalid random data category "' + randProp + '". Supported: ' + hazy.meta.random.types)
+        throw hazy.lang.exception(`Invalid random data category "${randProp}". Supported: ${hazy.meta.random.types}`)
       }
     },
 
@@ -108,7 +111,7 @@ hazy.lang = {
     '*': (prev, next) => hazy.fixture.query(next.trim()),
 
     // embed fixture from the filesystem
-    '>': (prev, next) => hazy.fixture.load(next.trim()),
+    '>': (prev, next) => hazy.fixture.src(next.trim()),
 
     // find and embed fixture from filesystem or pool
     '_': (prev, next) => hazy.fixture.find(next.trim()),
@@ -122,10 +125,11 @@ hazy.lang = {
 
   // extracts tokens from strs and evaluates them. interpolates strings, ignores and simply returns other data types
   process: (str) => {
-    const matches = str.split(hazy.lang.expression.all),
-          tokens  = []
+    let   result  = str
+    const matches = str.split(hazy.lang.expression.all)
+    const tokens  = []
 
-    _.forEach(matches, (match, i) => {
+    matches.forEach((match, i) => {
       const isToken = hazy.lang.tokens.validate(match)
 
       if (isToken) {
@@ -136,8 +140,8 @@ hazy.lang = {
 
         if (tokenResult) {
           // if processed token result is a string, substitute original string as we iterate
-          if (_.isString(tokenResult)) {
-            str = str.replace(hazy.lang.expression.first, tokenResult)
+          if (_.isString(tokenResult) || _.isNumber(tokenResult)) {
+            result = result.replace(hazy.lang.expression.first, tokenResult)
           } else {
             tokens.push(tokenResult)
           }
@@ -145,11 +149,13 @@ hazy.lang = {
       }
     }, this)
 
+    // if no tokens could be matched, leave untouched
+    // if no tokens at all, return result
     if (!_.isEmpty(tokens)) {
-      return _.reduce(tokens) || str
+      return _.reduce(tokens) || result
     }
 
-    return str
+    return result
   },
 
   exception: (msg) => new Error('[Hazy syntax error] ' + msg)
@@ -203,7 +209,7 @@ hazy.fixture = {
     }
   },
 
-   // dynamically process fixture values by type (object, string, array, or function)
+  // dynamically process fixture values by type (object, string, array, or function)
   process: (fixture, match) => {
     const processedFixture = fixture
 
@@ -237,20 +243,45 @@ hazy.fixture = {
   // queries the fixture pool for anything that matches the jsonpath pattern and processes it
   query: (pattern, match) => hazy.matcher.search(pattern, match),
 
-  // load and register a fixture from files matching a glob pattern
-  // TODO - support root path configuration
-  load: (pattern, options, key) => {
+  // glob and register a fixture from files matching a glob pattern
+  glob: (pattern, options, key) => {
     glob(pattern, options, (err, files) => {
       if (err) {
         throw new Error('Failed to load file')
       }
 
-      _.forEach(files, (file) => {
-        const fixtureKey = key instanceof Function ? key(file.name) : file.name
+      const fixtures = []
 
-        hazy.fixture.register(fixtureKey, JSON.parse(file))
+      files.forEach(file => {
+        try {
+          hazy.fixture.src(file, fixtures.push)
+        } catch (e) {
+          throw new hazy.lang.exception(`failed to register fixture from "${file}" during glob`)
+        }
       })
+
+      return fixtures
     })
+  },
+
+  // read in a fixture from the filesystem and register it
+  src(filepath, callback = (f) => f) {
+    if (filepath) {
+      return fs.readFileSync(path.resolve(filepath), 'utf-8', (err, data) => {
+        if (!err) {
+          const fixtureKey  = filepath
+          const fixtureData = JSON.parse(hazy.fixture.process(data))
+
+          hazy.fixture.register(fixtureKey, fixtureData)
+
+          return fixtureData
+        } else {
+          throw `Failed to read file: ${err}`
+        }
+      })
+    } else {
+      throw `Failed to read file, filepath required`
+    }
   },
 
   // removes a fixture by name from the pool
