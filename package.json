@@ -10,6 +10,7 @@
     "pretest": "npm run build",
     "test": "mocha --reporter nyan --compilers js:babel/register test",
     "auto-start": "nodemon --exec \"npm run lint && npm start\" --ignore public/js",
+    "postinstall": "npm run build",
     "prepublish": "npm run build"
   },
   "repository": {
@@ -28,6 +29,7 @@
     "url": "https://github.com/slurmulon/hazy/issues"
   },
   "dependencies": {
+    "acho": "^2.3.0",
     "babel": "^5.8.21",
     "chance": "~0.7.5",
     "glob": "^5.0.10",
