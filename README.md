@@ -160,7 +160,7 @@ hazy.fixture.register('someDog', {
 })
 ```
 
-will resolve to the following provided that `someDude` is in the fixture pool
+the above will resolve to the following provided that `someDude` is in the fixture pool:
 
 ```javascript
 {
@@ -184,7 +184,7 @@ Hazy utilizes `JsonPath` for defining functionality to pre-processed fixtures in
 Details on `JsonPath` can be found at http://goessner.net/articles/JsonPath/. There are many ways in which
 JSON objects can be queried using this flexible technique.
 
-The general idea in Haze is to give developers both fine grained and generalized control over the data and
+A primary goal of Hazy is to give developers both fine grained and generalized control over the data and
 functionality relevant to their fixtures.
 
 Take our `someDog` fixture, for example:
