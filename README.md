@@ -4,23 +4,23 @@
 
 -----
 
-Hazy aims to ease the hassle of generating, maintaining and working with JSON fixtures by making them more self-descriptive and programmatic.
-Hazy lets developers describe test data in a generic fasion and allows for fixtures to be processed further at run-time for increased flexibility.
+Hazy aims to ease the hassle of generating, maintaining and working with JSON fixtures by making them DRY and more expressive.
+Hazy lets developers describe test data in a normailzed fasion and allows for fixtures to be processed further at run-time for increased flexibility.
 
 ### Features
 
-* Data matching in JSON fixtures
-* Dynamic fixture embedding
-* Lazy processing via run-time queries ([jsonpath](http://goessner.net/articles/JsonPath/))
-* Syntax layer integrating `ChanceJS` that provides a simple and non-intrusive interface
+* Language specification for supporting both normalized and random data in fixtures
+* DRY, embeddable, and queryable fixtures / sub-fixtures
+* Random `String`, `Number` and `Date` data via `ChanceJS`
+* Lazy processing via run-time queries ([JsonPath](http://goessner.net/articles/JsonPath/))
 
 ### Design Goals
 
 * Non-invasive (retain all involved standards, especially JSON)
 * Unique and identifiable syntax
 * Convention based, interpreter agnostic
-* Pre-processed and optionally evaluated at run-time
-* Cleanly integrate with __all__ testing frameworks
+* Pre-processed, but optionally evaluated at run-time
+* Cleanly integrate with __all__ Node testing frameworks
 
 ### Example
 
@@ -55,7 +55,7 @@ The processed fixtures result as follows:
 // hazyDude
 {
   id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-  name: 'Mr. Cornelia Warner Agnes Hammond',
+  name: 'Mr. Agnes Hammond',
   bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
   ssn: '264-66-4154 (not really)'
 }
@@ -66,7 +66,7 @@ The processed fixtures result as follows:
   name: 'Dawg',
   owner: {
     id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-    name: 'Mr. Cornelia Warner Agnes Hammond',
+    name: 'Mr. Agnes Hammond',
     bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
     ssn: '264-66-4154 (not really)'
   }
@@ -74,6 +74,12 @@ The processed fixtures result as follows:
 ```
 
 ### Installation
+
+```
+> npm install hazy
+```
+
+if you wish to develop:
 
 ```
 > git clone http://github.com/slurmulon/hazy.git
@@ -103,7 +109,7 @@ Hazy sits on top of ChanceJS, a great library for generating all sorts of useful
 Hazy categorizes ChanceJS's generation methods for a more symantic syntax, but otherwise integration
 is completely transparent.
 
-The token for generating random data is `~`:
+The token for generating random data is `~` (whitespace is allowed on all operators):
 
 `|~<class>:<type>|`
 
@@ -143,12 +149,13 @@ The token for generating random data is `~`:
 
 ## Embedding
 
-Hazy supports embedding of other JSON fixtures (or really any value) present in the fixture pool. The example above shows this already:
+Hazy supports embedding of other JSON fixtures (or really any value) present in the fixture pool using the `+` operator.
+The example above shows this already:
 
 ```javascript
 hazy.fixture.register('someDog', {
-  id    : '|~misc:guid|',
-  owner : '|+someDude|'
+  id    : '|~ misc:guid|',
+  owner : '|+ someDude|'
   name  : 'Dawg',
 })
 ```
@@ -161,7 +168,7 @@ will resolve to the following provided that `someDude` is in the fixture pool
   name: 'Dawg',
   owner: {
     id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-    name: 'Mr. Cornelia Warner Agnes Hammond',
+    name: 'Mr. Agnes Hammond',
     bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
     ssn: '264-66-4154 (not really)'
   }
@@ -188,7 +195,7 @@ Take our `someDog` fixture, for example:
   name: 'Dawg',
   owner: {
     id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-    name: 'Mr. Cornelia Warner Agnes Hammond',
+    name: 'Mr. Agnes Hammond',
     bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
     ssn: '264-66-4154 (not really)'
   }
@@ -208,22 +215,24 @@ After the fixture has been queried, this will result with:
 `JsonPath` expressions that match against the fixture pool can be specified with the query operator `*`.
 The results of the expression and will be embedded into the fixture upon processing. The syntax for embedded queries is:
 
-`|*<jsonpath-expression>|`
+`|* <jsonpath-expression>|`
 
 where `<jsonpath-expression>` is a valid [JsonPath](http://goessner.net/articles/JsonPath/) expression
 
-> **Note:** Embedded queries are **not** and should not be lazily evaluated because:
+> **Note:** Embedded queries (i.e. those defined outside of the lazy matcher pool `hazy.matcher`, particularly in source *.json files/data) are **not** and cannot be lazily evaluated because:
 >
 > 1. Very high risk of cyclic dependencies and infinite recursion (e.g., some fixtures may need to be lazily evaluated if they have not already been, potentially triggering an endless cycle)
 > 2. Applying queries to pre-processed fixtures allows for cleaner queries (since you can query against Hazy tags) and provides consistent results.
 >    If queries were applied to post-processed fixtures, they would be bottlenecked to only working with properties since the processed random values 
 >    are obviously inconsistent.
+>
+> See the section on [Lazy Query Matchers](#lazy-query-matchers) for a pragmatic and idiomatic solution to the issue.
 
 Use of the operator is straight forward:
 
 ```javascript
 hazy.fixture.register('someShark', {
-  id   : '|~misc:guid|',
+  id   : '|~ misc:guid|',
   name : 'Tiger Shark',
   ate  : '|* $.id|', // queries pool for any fixture with an "id" property at the highest level
 })
@@ -237,7 +246,7 @@ this will result with something like:
   ate: 
     [ { 
         id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-        name: 'Mr. Cornelia Warner Agnes Hammond',
+        name: 'Mr. Agnes Hammond',
         bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
         ssn: '264-66-4154 (not really)'
       },
@@ -246,7 +255,7 @@ this will result with something like:
         name: 'Dawg',
         owner: {
           id: 'e76de72e-6010-5140-a270-da7b6b6ad2d7',
-          name: 'Mr. Cornelia Warner Agnes Hammond',
+          name: 'Mr. Agnes Hammond',
           bday: Wed Apr 27 1994 04:05:27 GMT-0700 (Pacific Daylight Time),
           ssn: '264-66-4154 (not really)'
         }
@@ -255,11 +264,15 @@ this will result with something like:
 }
 ```
 
-> **Note:** The query operator currently always returns an `Array`. I consider this a limitation because it makes it difficult to integrate queries with other expressions. I hope to fix this soon.
+> **Note:** The query operator currently always returns an `Array`. I consider this a limitation because it makes it difficult to integrate queries with other expressions. I hope to address this issue soon.
 
-### Functional Queries
+The only known limitation on the nesting depth of embedded fixtures is the stack size of the process.  I have not pushed this limitation very far at all, but if any
+issues are encountered then please open an issue on Github.
 
-With Hazy we can leverage this powerful query mechanism in any testing environment to provide test-specific functionality to your fixtures.
+### Lazy Query Matchers
+
+With Hazy we can leverage this powerful query mechanism in any Node environment to provide test-specific functionality to your fixtures.
+This is achieved by monkey-patching fixtures in the pool that match a specific `JsonPath` pattern.
 
 For example, if we wanted to query our fixture pool for any fixture with an `owner` object containing an `id` property
 and then update those fixtures with new `bark()` functionality, then we would use the following:
@@ -269,30 +282,29 @@ hazy.matcher.config({
   path   : '$.owner.id',
   handle : (fixture, matches, pattern) => {
     // return the fixture after mutating it (if you so desire)
-    return _.extend(fixture, {
+    return Object.assign({
       hasOwner : true,
-      bark     : () => {
+      bark : () => {
         console.log('woof woof, my owner is ', matches[0])
       }
-    })  
+    }, fixture)
   }
 })
 
 hazy.fixture.register('someDogWithOwner', {
-  id    : '|~misc:guid|',
+  id    : '|~ misc:guid|',
   name  : 'Happy Dog',
-  owner : '|+someDude|'
+  owner : '|+ someDude|'
 })
 
 hazy.fixture.register('someDogWithoutOwner', {
-  id    : '|~misc:guid|',
-  name  : 'Lonely Dog'
+  id   : '|~ misc:guid|',
+  name : 'Lonely Dog'
 })
 
 const happyDog  = hazy.fixture.get('someDogWithOwner')
 const lonelyDog = hazy.fixture.get('someDogWithoutOwner')
 ```
-
 Since the `matcher` only applies to fixtures with an owner id, only `happyDog` will contain the `hasOwner` property and
 a `bark` method:
 
@@ -310,31 +322,31 @@ lonelyDog.bark()
 
 -----
 
-This feature can also be combined with `hazy.fork()` so that queries can be context-specific. Any query defined
-at a higher context level can be easily and safely overwritten in a Hazy fork:
+This feature can also be combined with `hazy.fork()` so that query matchers can be scoped to a particular state of the fixture pool.
+Any query matcher defined at a higher scope can be easily and safely overwritten in a Hazy fork:
 
 ```javascript
 hazy.matcher.config({
   path   : '$.owner.id',
   handle : (fixture, matches, pattern) => {
     // return the fixture after mutating it (if you so desire)
-    return _.extend(fixture, {
+    return Object.assign({
       hasOwner : true,
-      bark     : () => {
+      bark : () => {
         console.log('woof woof, my owner is ', matches[0])
       }
-    })  
+    }, fixture)  
   }
 })
 
 hazy.fixture.register('someDogWithOwner', {
-  id    : '|~misc:guid|',
+  id    : '|~ misc:guid|',
   name  : 'Happy Dog',
-  owner : '|+someDude|'
+  owner : '|+ someDude|'
 })
 
 const happyDog  = hazy.fixture.get('someDogWithOwner')
-const sleepyDog = null
+let   sleepyDog = null
 
 function forkTest() {
   const newHazy = hazy.fork()
@@ -367,6 +379,13 @@ happyDog.bark()
 sleepyDog.bark()
 ```
 > now prints `zzzz, too tired`, overriding the matcher defined at a higher context level (AKA `happyDog`'s) safely
+
+Lastly, you have some control over when evaluation occurs:
+
+ * `hazy.fixture.get` will apply any pattern-matched functionality to the relevant fixture **each time** it is called.
+ * `hazy.fixture.lazyGet` applies any pattern-matched functionality to the relevant fixture, but only does so **once (memoized)**.
+
+Both implementations are technically lazy since their evaluation is deferred until the last minute, but `lazyGet` is even more so since it only runs once.
 
 ## TODO
 
