@@ -2,7 +2,7 @@
   "name": "hazy",
   "version": "0.0.8",
   "description": "Lazy JSON fixtures",
-  "main": "./lib/hazy",
+  "main": "./lib/hazy.js",
   "scripts": {
     "build": "babel src --out-dir lib",
     "lint": "eslint src/hazy.js",
@@ -21,7 +21,8 @@
     "hazy",
     "stub",
     "json",
-    "fixtures"
+    "fixtures",
+    "lazy"
   ],
   "author": "MadHax",
   "license": "MIT",
