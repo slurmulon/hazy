@@ -304,9 +304,9 @@ describe('fixture', () => {
     // TODO
   })
 
-  describe('load()', () => {
+  describe('src()', () => {
     it('should be a defined method', () => {
-      hazyStub.fixture.load.should.be.a('function')
+      hazyStub.fixture.src.should.be.a('function')
     })
 
     // TODO

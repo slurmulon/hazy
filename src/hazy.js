@@ -187,7 +187,7 @@ hazy.fixture = {
   lazyGet: _.memoize(key => hazy.fixture.get(key)),
 
   // attempts to get a fixture from the pool. if that fails, the fixture is searched for on the file system.
-  find: (key) => hazy.fixture.get(key) || hazy.fixture.load(`${key}.json`),
+  find: (key) => hazy.fixture.get(key) || hazy.fixture.src(`${key}.json`),
 
   // lazily finds a fixture, processing it only once
   lazyFind: _.memoize(key => hazy.fixture.find(key)),

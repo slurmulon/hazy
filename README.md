@@ -43,7 +43,7 @@ hazy.fixture.register('someDude', {
   owner : '|+someDude|'
   name  : 'Dawg',
 }*/
-hazy.fixture.load('someDog')
+hazy.fixture.src('someDog')
 
 const hazyDude = hazy.fixture.get('someDude')
 const hazyDog  = hazy.fixture.get('someDog')
