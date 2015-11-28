@@ -55,8 +55,8 @@ hazy.meta = {
 
 hazy.lang = {
   expression: {
-    first : /\|(:|~|>|_|\*|\+)(.*?)?\|/,
-    all   : /\|(:|~|>|_|\*|\+)(.*?)?\|/g
+    first : /\|(~|=|>|_|\$|\?)(.*?)?\|/,
+    all   : /\|(~|=|>|_|\$|\?)(.*?)?\|/g
   },
 
   tokens: {
@@ -73,60 +73,32 @@ hazy.lang = {
       }
     },
 
-    // property separator / accessor
-    ':': (prev, next) => { // property accessor
-      if (!prev) {
-        throw hazy.lang.exception('Syntax error, : requires a left operand')
-      }
-
-      return prev[next]
-    },
-
     // random data
-    '~': (prev, next) => {
-      const randProp   = new String(next.split(':')[0]).trim(),
-            randVal    = new String(next.split(':')[1]).trim(),
-            canUseProp = hazy.random.hasOwnProperty(randProp)
+    '~': (prev, next) => _.get(hazy.random, next.trim(), null),
 
-      if (canUseProp) {
-        const randObjByProp  = hazy.random[randProp],
-              randObjSubType = randVal // get property of random operator following ":"
-
-        if (!randObjByProp || !randObjByProp[randObjSubType]) {
-          // throw hazy.lang.exception('Invalid random data type "' + randObjSubType + '". Supported: ' + hazy.meta.random.types[randProp])
-          throw hazy.lang.exception(`Invalid random data type "${randObjSubType}". Supported: ` + JSON.stringify(hazy.meta.random.types[randProp]))
-        }
-
-        return randObjByProp[randObjSubType]()
-      } else {
-        // throw hazy.lang.exception('Invalid random data category "' + randProp + '". Supported: ' + hazy.meta.random.types)
-        throw hazy.lang.exception(`Invalid random data category "${randProp}". Supported: ${hazy.meta.random.types}`)
-      }
-    },
-
-    // embed fixture from the pool
-    '+': (prev, next) => hazy.fixture.get(next.trim()),
+    // embed fixture (or any data really) from the pool
+    '=': (prev, next) => hazy.fixture.get(next.trim()),
 
     // query and embed fixture from the pool
-    '*': (prev, next) => hazy.fixture.query(next.trim()),
+    '$': (prev, next) => hazy.fixture.query(`$${next.trim()}`),
 
     // embed fixture from the filesystem
     '>': (prev, next) => hazy.fixture.src(next.trim()),
 
     // find and embed fixture from filesystem or pool
-    '_': (prev, next) => hazy.fixture.find(next.trim()),
+    '?': (prev, next) => hazy.fixture.find(next.trim()),
 
-    // TODO - embed fixture from a remote URL ("@")
-
+    // ensure token is supported
     validate: (token) => hazy.lang.tokens.hasOwnProperty(token),
 
+    // processes token (operator/prev) and associated data (operand/next)
     process: (token, prev, next, rest) => _.bindKey(hazy.lang.tokens, token, prev, next, rest)()
   },
 
-  // extracts tokens from strs and evaluates them. interpolates strings, ignores and simply returns other data types
-  process: (str) => {
-    let   result  = str
-    const matches = str.split(hazy.lang.expression.all)
+  // extracts tokens from text and evaluates them. interpolates strings, ignores and simply returns other data types
+  process: (text) => {
+    let   result  = text
+    const matches = text.split(hazy.lang.expression.all)
     const tokens  = []
 
     matches.forEach((match, i) => {
@@ -138,8 +110,8 @@ hazy.lang = {
               restMatches = _.drop(matches, i + 1),
               tokenResult = hazy.lang.tokens.process(match, prevMatch, nextMatch, restMatches)
 
+        // when processed token result is a string, substitute original string as we iterate
         if (tokenResult) {
-          // if processed token result is a string, substitute original string as we iterate
           if (_.isString(tokenResult) || _.isNumber(tokenResult)) {
             result = result.replace(hazy.lang.expression.first, tokenResult)
           } else {
@@ -147,10 +119,9 @@ hazy.lang = {
           }
         }
       }
-    }, this)
+    })
 
     // if no tokens could be matched, leave untouched
-    // if no tokens at all, return result
     if (!_.isEmpty(tokens)) {
       return _.reduce(tokens) || result
     }
@@ -265,7 +236,7 @@ hazy.fixture = {
   },
 
   // read in a fixture from the filesystem and register it
-  src(filepath, callback = (f) => f) {
+  src(filepath, callback = (done) => done) {
     if (filepath) {
       return fs.readFileSync(path.resolve(filepath), 'utf-8', (err, data) => {
         if (!err) {
@@ -414,7 +385,7 @@ hazy.matcher = {
 hazy.random = _.mapValues(hazy.meta.random.types, (value, key) => {
   let hazyRandObj = {}
   
-  _.forEach(value, v => {
+  _.forEach(value, (v) => {
      hazyRandObj[v] = () => new Chance()[v]()
   })
   
