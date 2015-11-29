@@ -85,8 +85,8 @@ hazy.lang = {
 
   // extracts tokens from text and evaluates them for interpolation.
   // interpolates strings, ignores and simply returns other data types.
-  process: (text) => {
-    let   result  = hazy.lang.evaluate(text)
+  process: (text, scope) => {
+    let   result  = hazy.lang.evaluate(text, scope)
     const matches = result.split(hazy.lang.expression.all)
     const tokens  = []
 
@@ -124,7 +124,7 @@ hazy.lang = {
   // essentially allow for the evaluation of JavaScript with global data.
   // use with caution as you can technically break the JSON specification.
   // TODO - make collection aliases that are surrounded with brackets instead of '|'
-  evaluate: (text, data) => {
+  evaluate: (text, scope) => {
     const options = {
       escape      : /(?!(.*?)*)/g, // don't match anyhthing
       evaluate    : /\|>([\s\S]+?)\|/g,
@@ -135,7 +135,7 @@ hazy.lang = {
       }
     }
 
-    return _.template(text, options)(data)
+    return _.template(text, options)(scope)
   },
 
   exception: (msg) => new Error(`[Hazy syntax error] ${msg}`)

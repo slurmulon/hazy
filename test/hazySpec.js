@@ -310,8 +310,13 @@ describe('fixture', () => {
     })
 
     it('should process incoming fixture and place it into the fixture pool', () => {
-      hazyStub.fixture.register('foo', {bar: '|~basic.integer|'})
-      hazyStub.fixture.get('foo').bar.should.not.equal('|~basic.integer|')
+      hazyStub.fixture.register('foo', {bar: '|~basic.string|'})
+      hazyStub.fixture.get('foo').bar.should.not.equal('|~basic.string|')
+    })
+
+    it('should process fixture and place it into the pool using the unprocessed key', () => {
+      hazyStub.fixture.register('|~misc.guid|', true)
+      _.keys(hazyStub.fixture.pool).should.contain('|~misc.guid|')
     })
   })
 
@@ -321,9 +326,9 @@ describe('fixture', () => {
     })
 
     it('should process fixture map and place fixtures into the pool', () => {
-      hazyStub.fixture.registerAll({foo: 'bar', baz: '|~basic.integer|'})
+      hazyStub.fixture.registerAll({foo: 'bar', baz: '|~basic.string|'})
       hazyStub.fixture.get('foo').should.equal('bar')
-      hazyStub.fixture.get('baz').should.not.equal('|~basic.integer|')
+      hazyStub.fixture.get('baz').should.not.equal('|~basic.string|')
     })
   })
 
@@ -368,8 +373,26 @@ describe('fixture', () => {
       })
     })
 
-    // should reject invalid matchers
-    // should only match when 'match' is true
+    describe('matching', () => {
+      it('should only occur if config.matcher.use is true and match is true', () => {
+        hazyStub.matcher.config({
+          path: '$.a',
+          handle: (data) => Object.assign(data, {boom: true})
+        })
+
+        hazyStub.config.matcher.use = false
+        hazyStub.fixture.process({a: 'b'}, false).should.not.have.ownProperty('boom')
+
+        hazyStub.config.matcher.use = false
+        hazyStub.fixture.process({a: 'b'}, true).should.not.have.ownProperty('boom')
+
+        hazyStub.config.matcher.use = true
+        hazyStub.fixture.process({a: 'b'}, false).should.not.have.ownProperty('boom')
+
+        hazyStub.config.matcher.use = true
+        hazyStub.fixture.process({a: 'b'}, true).should.have.ownProperty('boom')
+      })
+    })
   })
 
   describe('processAll()', () => {
