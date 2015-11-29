@@ -189,7 +189,7 @@ describe('lang', () => {
     })
 
     it('should evaluate text before processing it through the interpolator', () => {
-      const stub = '|! _.forEach([1,2,3,4], function(i) {| |~basic.character| |! }) |';
+      const stub = '|> _.forEach([1,2,3,4], function(i) {| |~basic.character| |> })|';
 
       hazy.lang.process(stub).should.have.length(12)
     })
@@ -208,7 +208,7 @@ describe('lang', () => {
 
     })
 
-    describe('!', () => {
+    describe('>', () => {
       it('should evaluate contents as JavaScript expressions', () => {
 
       })
