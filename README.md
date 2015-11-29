@@ -83,6 +83,7 @@ if you wish to develop:
 
 ```
 > git clone http://github.com/slurmulon/hazy.git
+> cd hazy
 > npm link hazy
 ```
 
@@ -102,11 +103,19 @@ then
 
 The following provides a high-level summary of all of Hazy's features as well as some examples and gotchas.
 
-A notable observation is that all of Hazy's tokens and expressions adhere to the following format:
+A notable observation is that Hazy's syntax can be expressed quite simply:
 
 `|<operator> <expression|statement>|`
 
-Also note that whitespace is allowed throughout.
+Supported operators are:
+
+ * `~` generate random data
+ * '*' embed fixture data from pool
+ * '$' query and embed fixture data from pool
+ * '>' embed fixture data from filesystem
+ * '?' find and embed fixture from pool or filesystem
+
+(more thorough documentation on the way)
 
 ## Randomness
 
