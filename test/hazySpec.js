@@ -352,8 +352,8 @@ describe('fixture', () => {
       })
 
       describe('string', () => {
-        it('should process the fixture through lang.process', () => {\
-          hazyStub.fixture.process('|~basic.bool|').should.match(/^true|false/)
+        it('should process the fixture through lang.process', () => {
+          hazyStub.fixture.process('|~basic.natural|').should.match(/^\d+/)
         })
       })
 
