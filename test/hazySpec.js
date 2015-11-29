@@ -170,12 +170,34 @@ describe('lang', () => {
   })
 
   describe('process()', () => {
+    it('should be a defined method', () => {
+      hazy.lang.process.should.be.a('function')
+    })
 
+    it('should process valid token matches in text', () => {
+      hazyStub.fixture.register('foo', 'bar')
+      hazyStub.fixture.register('baz', {find: true})
+      hazyStub.lang.process('|~ basic.string|').should.be.a('string')
+      hazyStub.lang.process('|* foo|').should.equal('bar')
+      //hazyStub.lang.process('|$ .find|')
+    })
+
+    it('should not process invalid tokens in text', () => {
+      hazy.lang.process('|~ web.email').should.equal('|~ web.email')
+      hazy.lang.process('| web.email|').should.equal('| web.email|')
+      hazy.lang.process('||web.email|').should.equal('||web.email|')
+    })
+
+    it('should evaluate text before processing it through the interpolator', () => {
+      const stub = '|! _.forEach([1,2,3,4], function(i) {| |~basic.character| |! }) |';
+
+      hazy.lang.process(stub).should.have.length(12)
+    })
   })
 
   describe('evaluate()', () => {
     it('should be a defined method', () => {
-
+      hazy.lang.evaluate.should.be.a('function')
     })
 
     it('should provide fixture pool to template', () => {
@@ -186,17 +208,16 @@ describe('lang', () => {
 
     })
 
-    // -, !, =
-    describe('%', () => {
-
-    })
-
     describe('!', () => {
-      
+      it('should evaluate contents as JavaScript expressions', () => {
+
+      })
     })
 
     describe('=', () => {
-      
+      it('should interpolate contents against the data pool', () => {
+
+      })
     })
   })
 })
