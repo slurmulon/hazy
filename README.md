@@ -112,8 +112,9 @@ Supported operators are:
  * `~` generate random data
  * '*' embed fixture data from pool
  * '$' query and embed fixture data from pool
- * '>' embed fixture data from filesystem
  * '?' find and embed fixture from pool or filesystem
+ * '>' evaluate content as literal JavaScript
+ * '=' interpolate expression result
 
 (more thorough documentation on the way)
 
@@ -423,10 +424,10 @@ hazy.lang.process('{"random_point": "|= random.basic.integer({min: 0, max: 100})
 ### Evaluate
 Evaluates content as JavaScript, allowing you to perform `if` statements, loops, etc.
 
-Specified with the `!` operator.
+Specified with the `>` operator.
 
 ```javascript
-hazy.lang.process('{"random_point": "|! print(random.basic.integer({min: 0, max: 100})|"})')
+hazy.lang.process('{"random_point": "|> print(random.basic.integer({min: 0, max: 100}))|"}')
 ```
 
 ## TODO

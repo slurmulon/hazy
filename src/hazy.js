@@ -70,9 +70,6 @@ hazy.lang = {
     // query and embed fixture from the pool
     '$': (prev, next) => hazy.fixture.query(`$${next.trim()}`),
 
-    // embed fixture from the filesystem
-    '>': (prev, next) => hazy.fixture.src(next.trim()),
-
     // find and embed fixture from filesystem or pool
     '?': (prev, next) => hazy.fixture.find(next.trim()),
 
@@ -126,6 +123,7 @@ hazy.lang = {
   // evaluates an interpolation template against text. operators defined here
   // essentially allow for the evaluation of JavaScript with global data.
   // use with caution as you can technically break the JSON specification.
+  // TODO - make collection aliases that are surrounded with brackets instead of '|'
   evaluate: (text, data) => {
     const _data = data || {
       pool   : hazy.fixture,
@@ -134,7 +132,7 @@ hazy.lang = {
 
     const _options = {
       escape      : /(?!(.*?)*)/g, // don't match anyhthing // /\|%([\s\S]+?)\|/g,
-      evaluate    : /\|!([\s\S]+?)\|/g,
+      evaluate    : /\|>([\s\S]+?)\|/g,
       interpolate : /\|=([\s\S]+?)\|/g,
     }
 
