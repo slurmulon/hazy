@@ -110,11 +110,12 @@ A notable observation is that Hazy's syntax can be expressed quite simply:
 Supported operators are:
 
  * `~` generate random data
- * '*' embed fixture data from pool
- * '$' query and embed fixture data from pool
- * '?' find and embed fixture from pool or filesystem
- * '>' evaluate content as literal JavaScript
- * '=' interpolate expression result
+ * `*` embed fixture data from pool
+ * `$` query by `JsonPath` pattern and embed fixture from pool
+ * `@` find and embed fixture from pool
+ * `?` find and embed fixture from pool or filesystem
+ * `>` evaluate content as literal JavaScript
+ * `=` interpolate expression result
 
 (more thorough documentation on the way)
 
