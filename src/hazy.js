@@ -47,8 +47,8 @@ hazy.meta = {
 
 hazy.lang = {
   expression: {
-    first : /\|(~|>|\*|\$|\?){1}(.*?)?\|/,
-    all   : /\|(~|>|\*|\$|\?){1}(.*?)?\|/g
+    first : /\|(~|@|\*|\$|\?){1}(.*?)?\|/,
+    all   : /\|(~|@|\*|\$|\?){1}(.*?)?\|/g
   },
 
   tokens: {
@@ -69,6 +69,9 @@ hazy.lang = {
 
     // query and embed fixture from the pool
     '$': (prev, next) => hazy.fixture.query(`$${next.trim()}`),
+
+    // embed fixture from the filesystem
+    '@': (prev, next) => hazy.fixture.src(next.trim()),
 
     // find and embed fixture from filesystem or pool
     '?': (prev, next) => hazy.fixture.find(next.trim()),
