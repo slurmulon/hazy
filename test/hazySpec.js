@@ -63,33 +63,18 @@ describe('lang', () => {
       })
     })
 
-    // describe('.', () => {
-    //   it('should access the "next" property of the "prev" match', () => {
-    //     const testAccessor = hazyStub.lang.tokens['.']({test: 'works'}, 'test')
-
-    //     testAccessor.should.equal('works')
-    //   })
-
-    //   it('should throw an exception if there is no "prev" match', () => {
-    //     (function(){
-    //      hazyStub.lang.tokens['.'](null, '.')
-    //     }).should.throw()
-    //   })
-    // })
-
     describe('~', () => {
       it('should categorically interface to ChanceJS', () => {
-        _.forEach(hazy.meta.random.types, function(subTypes, type) {
-          _.forEach(subTypes, function(subType) {
-            var randExp = type + '.' + subType,
-                randRes = hazyStub.lang.tokens['~'](null, randExp)
+        _.forEach(hazy.meta.random.types, (subTypes, type) => {
+          _.forEach(subTypes, (subType) => {
+            const randExp = type + '.' + subType,
+                  randRes = hazyStub.lang.tokens['~'](null, randExp)
 
-            randRes.should.not.be.undefined  
+            randRes.should.not.be.undefined
+            randRes.should.not.equal(`~${randExp}`)
           })
         })
       })
-
-      // TODO - it('should replace valid tokens with appropriate random values')
     })
 
     describe('*', () => {
@@ -100,10 +85,9 @@ describe('lang', () => {
         hazyStub.fixture.register('testChild', testChild)
         hazyStub.fixture.register('testParent', testParent)
 
-        hazyStub.fixture.get('testParent').child.should.equal(testChild)
+        hazyStub.fixture.get('testParent').child.should.deep.equal(testChild)
       })
 
-      // FIXME - should probably make this replace value with 'undefined' instead of leaving an untouched token
       it('should ignore embed links with no matching names', () => {
         const testChild  = {role: 'child'},
               testParent = {role: 'parent', child: '|*missingChild|'}
@@ -121,7 +105,7 @@ describe('lang', () => {
         hazyStub.fixture.register('testChild', testChild)
         hazyStub.fixture.register('testParent', testParent)
 
-        hazyStub.fixture.get('testParent').child.should.equal(testChild)
+        hazyStub.fixture.get('testParent').child.should.deep.equal(testChild)
       })
     })
 
@@ -156,15 +140,15 @@ describe('lang', () => {
       })
     })
 
-    describe('>', () => {
+    xdescribe('@', () => {
       it('should find and embed fixtures from either the filepath (by glob) or fixture pool', () => {
-
+        // TODO
       })
     })
 
-    describe('?', () => {
+    xdescribe('?', () => {
       it('should find and embed fixtures from either the filepath (by glob) or fixture pool', () => {
-
+        // TODO
       })
     })
   })
@@ -189,9 +173,9 @@ describe('lang', () => {
     })
 
     it('should evaluate text before processing it through the interpolator', () => {
-      const stub = '|> _.forEach([1,2,3,4], function(i) {| |~basic.character| |> })|';
+      const testTxt = '|> _.forEach([1,2,3,4], (i) => {| |~basic.character| |> })|';
 
-      hazy.lang.process(stub).should.have.length(12)
+      hazy.lang.process(testTxt).should.have.length(12)
     })
   })
 
@@ -200,23 +184,20 @@ describe('lang', () => {
       hazy.lang.evaluate.should.be.a('function')
     })
 
-    it('should provide fixture pool to template', () => {
-
-    })
-
-    it('should provide random data generators to template', () => {
-
-    })
-
     describe('>', () => {
       it('should evaluate contents as JavaScript expressions', () => {
-
+        hazyStub.lang.evaluate('|> print(3 % 2)|').should.equal('1')
       })
     })
 
     describe('=', () => {
-      it('should interpolate contents against the data pool', () => {
+      it('should interpolate tokens against the fixture data pool', () => {
+        hazyStub.fixture.register('foo', 'bar')
+        hazyStub.lang.evaluate('|= fixture.get("foo")|').should.equal('bar')
+      })
 
+      it('should interpolate tokens against the random data generators', () => {
+        hazyStub.lang.evaluate('|= random.basic.bool()|').should.match(/^true|false/)
       })
     })
   })
@@ -327,10 +308,10 @@ describe('fixture', () => {
     it('should be a defined method', () => {
       hazyStub.fixture.register.should.be.a('function')
     })
-    // TODO - it('should wrap incoming fixtures with a special lazy object when specified')
 
-    xit('should process incoming fixtures and place them into the fixture pool', () => {
-
+    it('should process incoming fixture and place it into the fixture pool', () => {
+      hazyStub.fixture.register('foo', {bar: '|~basic.integer|'})
+      hazyStub.fixture.get('foo').bar.should.not.equal('|~basic.integer|')
     })
   })
 
@@ -339,7 +320,11 @@ describe('fixture', () => {
       hazyStub.fixture.registerAll.should.be.a('function')
     })
 
-    // TODO
+    it('should process fixture map and place fixtures into the pool', () => {
+      hazyStub.fixture.registerAll({foo: 'bar', baz: '|~basic.integer|'})
+      hazyStub.fixture.get('foo').should.equal('bar')
+      hazyStub.fixture.get('baz').should.not.equal('|~basic.integer|')
+    })
   })
 
   describe('process()', () => {
@@ -348,11 +333,65 @@ describe('fixture', () => {
     })
 
     // TODO
+    describe('fixtures by type', () => {
+      describe('object', () => {
+        it('should process each key through hazy.lang', () => {
+          const testFixture = {'|~text.word|': true}
+          hazyStub.fixture.register('foo', testFixture)
+
+          const testResult = hazyStub.fixture.process(testFixture)
+          testResult.should.not.equal(testFixture)
+        })
+
+        it('should process each value through hazy.lang', () => {
+          const testFixture = {foo: '|~basic.string|', bar: '|~basic.natural|'}
+
+          hazyStub.fixture.process(testFixture).foo.should.not.equal('|~basic.string|')
+          hazyStub.fixture.process(testFixture).bar.should.not.equal('|~basic.natural|')
+        })
+      })
+
+      describe('string', () => {
+        it('should process the fixture through lang.process', () => {\
+          hazyStub.fixture.process('|~basic.bool|').should.match(/^true|false/)
+        })
+      })
+
+      describe('array', () => {
+        it('should recursively process each fixture', () => {
+          const testFixtureFoo = {foo: '|~basic.string|'}
+          const testFixtureBar = {bar: '|~basic.natural|'}
+          const testResult     = hazyStub.fixture.process([testFixtureFoo, testFixtureBar])
+
+          testResult[0].should.have.ownProperty('foo')
+          testResult[1].should.have.ownProperty('bar')
+        })
+      })
+    })
+
+    // should reject invalid matchers
+    // should only match when 'match' is true
+  })
+
+  describe('processAll()', () => {
+    it('should be a defined method', () => {
+      hazyStub.fixture.processAll.should.be.a('function')
+    })
+
+    // TODO
   })
 
   describe('query()', () => {
     it('should be a defined method', () => {
       hazyStub.fixture.query.should.be.a('function')
+    })
+
+    // TODO
+  })
+
+  describe('glob()', () => {
+    it('should be a defined method', () => {
+      hazyStub.fixture.glob.should.be.a('function')
     })
 
     // TODO
@@ -375,7 +414,7 @@ describe('fixture', () => {
 // \/    \/\__,_|\__\___|_| |_|\___|_|  |___/
 //
 
-describe('matcher', () => {
+xdescribe('matcher', () => {
 
   describe('config()', () => {
 
@@ -411,8 +450,12 @@ describe('matcher', () => {
 //
 
 describe('random', () => {
-  xit('should map to the ChanceJS library', () => {
-
+  it('should map to the ChanceJS library', () => {
+    _.forEach(hazy.meta.random.types, (subTypes, type) => {
+      _.forEach(subTypes, (subType) => {
+        _.get(hazy.random, `${type}.${subType}`).should.be.instanceof(Function)
+      })
+    })
   })
 
   it('should return unique values each time a ChanceJS-based own property is accessed', () => {
@@ -421,5 +464,16 @@ describe('random', () => {
     const arbRand2 = arbRandFunc()
 
     arbRand1.should.not.equal(arbRand2)
+  })
+
+  it('should allow a configuration object to be provided to random factories', () => {
+    const arbRandFunc = hazy.random.basic.integer
+    const arbRand1 = arbRandFunc({min: 0,  max: 10})
+    const arbRand2 = arbRandFunc({min: -5, max: 5})
+
+    arbRand1.should.not.be.above(10)
+    arbRand1.should.not.be.below(0)
+    arbRand2.should.not.be.above(5)
+    arbRand2.should.not.be.below(-5)
   })
 })
