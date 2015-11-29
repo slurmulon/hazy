@@ -7,8 +7,7 @@ import fs from 'fs'
 import path from 'path'
 import glob from 'glob'
 
-let hazy = {}
-
+const hazy = {}
 
 //    ___             __ _       
 //   / __\___  _ __  / _(_) __ _ 
@@ -18,16 +17,9 @@ let hazy = {}
 //                         |___/ 
 
 hazy.config = {
-  seed: null,
-  lazy: true,
-  debug: false,
   matcher: {
     use: true
   },
-  errors: {
-    quiet: false,
-    soft: false
-  }
 }
 
 hazy.meta = {
@@ -55,8 +47,8 @@ hazy.meta = {
 
 hazy.lang = {
   expression: {
-    first : /\|(~|=|>|_|\$|\?)(.*?)?\|/,
-    all   : /\|(~|=|>|_|\$|\?)(.*?)?\|/g
+    first : /\|(~|>|\*|\$|\?){1}(.*?)?\|/,
+    all   : /\|(~|>|\*|\$|\?){1}(.*?)?\|/g
   },
 
   tokens: {
@@ -67,17 +59,13 @@ hazy.lang = {
       if (isNextTokenEnd) {
         throw hazy.lang.exception('Cannot define an empty expression')
       }
-
-      if (!next) {
-        // TODO - return a special value saying that this is the end of the token expression sequence. currenlty not technically needed
-      }
     },
 
     // random data
     '~': (prev, next) => _.get(hazy.random, next.trim(), null),
 
     // embed fixture (or any data really) from the pool
-    '=': (prev, next) => hazy.fixture.get(next.trim()),
+    '*': (prev, next) => hazy.fixture.get(next.trim()),
 
     // query and embed fixture from the pool
     '$': (prev, next) => hazy.fixture.query(`$${next.trim()}`),
@@ -95,16 +83,18 @@ hazy.lang = {
     process: (token, prev, next, rest) => _.bindKey(hazy.lang.tokens, token, prev, next, rest)()
   },
 
-  // extracts tokens from text and evaluates them. interpolates strings, ignores and simply returns other data types
+  // extracts tokens from text and evaluates them for interpolation.
+  // interpolates strings, ignores and simply returns other data types.
   process: (text) => {
     let   result  = text
     const matches = text.split(hazy.lang.expression.all)
     const tokens  = []
 
+    // match tokens and process them
     matches.forEach((match, i) => {
-      const isToken = hazy.lang.tokens.validate(match)
+      const isTokenValid = hazy.lang.tokens.validate(match)
 
-      if (isToken) {
+      if (isTokenValid) {
         const prevMatch   = matches[i - 1],
               nextMatch   = matches[i + 1],
               restMatches = _.drop(matches, i + 1),
@@ -121,15 +111,37 @@ hazy.lang = {
       }
     })
 
-    // if no tokens could be matched, leave untouched
+    // evaluate post-processed text against custom lodash template
+    result = hazy.lang.evaluate(result)
+
+    // reduce complex token replacements (non-String, non-Number)
     if (!_.isEmpty(tokens)) {
       return _.reduce(tokens) || result
     }
 
+    // when no tokens could be matched, return interpolated result
     return result
   },
 
-  exception: (msg) => new Error('[Hazy syntax error] ' + msg)
+  // evaluates an interpolation template against text. operators defined here
+  // essentially allow for the evaluation of JavaScript with global data.
+  // use with caution as you can technically break the JSON specification.
+  evaluate: (text, options, data) => {
+    const _options = options || {
+      escape      : /\|%([\s\S]+?)\|/g,
+      evaluate    : /\|!([\s\S]+?)\|/g,
+      interpolate : /\|=([\s\S]+?)\|/g,
+    }
+
+    const _data = data || {
+      fixtures : hazy.fixtures,
+      random   : hazy.random
+    }
+
+    return _.template(text, _options)(_data)
+  },
+
+  exception: (msg) => new Error(`[Hazy syntax error] ${msg}`)
 }
 
 
@@ -154,11 +166,11 @@ hazy.fixture = {
     return fixture
   },
 
-  // lazily acquires a fixture from the pool, processing it only once
-  lazyGet: _.memoize(key => hazy.fixture.get(key)),
-
   // attempts to get a fixture from the pool. if that fails, the fixture is searched for on the file system.
   find: (key) => hazy.fixture.get(key) || hazy.fixture.src(`${key}.json`),
+
+  // lazily acquires a fixture from the pool, processing it only once
+  lazyGet: _.memoize(key => hazy.fixture.get(key)),
 
   // lazily finds a fixture, processing it only once
   lazyFind: _.memoize(key => hazy.fixture.find(key)),
@@ -218,7 +230,7 @@ hazy.fixture = {
   glob: (pattern, options, key) => {
     glob(pattern, options, (err, files) => {
       if (err) {
-        throw new Error('Failed to load file')
+        throw new Error('failed to load file')
       }
 
       const fixtures = []
@@ -236,7 +248,7 @@ hazy.fixture = {
   },
 
   // read in a fixture from the filesystem and register it
-  src(filepath, callback = (done) => done) {
+  src(filepath) {
     if (filepath) {
       return fs.readFileSync(path.resolve(filepath), 'utf-8', (err, data) => {
         if (!err) {
@@ -247,11 +259,11 @@ hazy.fixture = {
 
           return fixtureData
         } else {
-          throw `Failed to read file: ${err}`
+          throw `failed to read file: ${err}`
         }
       })
     } else {
-      throw `Failed to read file, filepath required`
+      throw `failed to read file, filepath required`
     }
   },
 
@@ -265,7 +277,6 @@ hazy.fixture = {
     hazy.fixture.pool = {}
   }
 }
-
 
 //               _       _                   
 //   /\/\   __ _| |_ ___| |__   ___ _ __ ___ 
@@ -342,8 +353,7 @@ hazy.matcher = {
       .value()
   },
 
-  // executes a single pattern matcher handle on a fixture.
-  // passive. does not consider non-matching patterns an error unless the matcher is corrupt
+  // passively executes a single pattern matcher handle on a fixture.
   process: (pattern, fixture) => {
     const matcher = hazy.matcher.pool[pattern]
 
@@ -353,7 +363,7 @@ hazy.matcher = {
 
         return matcher.handle(fixture, matches, pattern)
       } else {
-        throw 'Match pattern does not apply to fixture or handle is not a function'
+        throw 'match pattern does not apply to fixture or handle is not a function'
       }
     }
 
@@ -374,7 +384,6 @@ hazy.matcher = {
 
 }
 
-
 //    __                 _                 
 //   /__\ __ _ _ __   __| | ___  _ __ ___  
 //  / \/// _` | '_ \ / _` |/ _ \| '_ ` _ \ 
@@ -382,6 +391,7 @@ hazy.matcher = {
 // \/ \_/\__,_|_| |_|\__,_|\___/|_| |_| |_|
 //
 
+// map to random data generator (Chance)
 hazy.random = _.mapValues(hazy.meta.random.types, (value, key) => {
   let hazyRandObj = {}
   
@@ -391,7 +401,6 @@ hazy.random = _.mapValues(hazy.meta.random.types, (value, key) => {
   
   return hazyRandObj
 })
-
 
 //    ___       _ _     _ 
 //   / __\_   _(_) | __| |

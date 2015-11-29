@@ -25,19 +25,19 @@ describe('lang', () => {
 
   describe('expressions', () => {
     describe('all', () => {
-      it('should match all expressions defined by two | (start/end) tokens and an operator in each case', () => {
-        const testStr   = 'avoid |=capture1| avoid |=capture2|'
+      it('should match all expressions defined by two | (start/end) tokens and a leading operator in each case', () => {
+        const testStr   = 'avoid |*capture1| avoid |*capture2|'
         const testMatch = testStr.match(hazyStub.lang.expression.all)
 
-        '|=capture1|'.should.equal(testMatch[0])
-        '|=capture2|'.should.equal(testMatch[1])
+        '|*capture1|'.should.equal(testMatch[0])
+        '|*capture2|'.should.equal(testMatch[1])
       })
 
       it('should avoid expressions without operators', () => {
-        const testStr   = 'avoid |=capture| avoid |naughty|'
+        const testStr   = 'avoid |*capture| avoid |naughty|'
         const testMatch = testStr.match(hazyStub.lang.expression.all)
 
-        '|=capture|'.should.equal(testMatch[0])
+        '|*capture|'.should.equal(testMatch[0])
         testMatch.length.should.equal(1)
       })
 
@@ -92,10 +92,10 @@ describe('lang', () => {
       // TODO - it('should replace valid tokens with appropriate random values')
     })
 
-    describe('+', () => {
+    describe('*', () => {
       it('should embed fixtures with a matching name', () => {
         const testChild  = {role: 'child'},
-              testParent = {role: 'parent', child: '|=testChild|'}
+              testParent = {role: 'parent', child: '|*testChild|'}
 
         hazyStub.fixture.register('testChild', testChild)
         hazyStub.fixture.register('testParent', testParent)
@@ -106,17 +106,17 @@ describe('lang', () => {
       // FIXME - should probably make this replace value with 'undefined' instead of leaving an untouched token
       it('should ignore embed links with no matching names', () => {
         const testChild  = {role: 'child'},
-              testParent = {role: 'parent', child: '|=missingChild|'}
+              testParent = {role: 'parent', child: '|*missingChild|'}
 
         hazyStub.fixture.register('testChild', testChild)
         hazyStub.fixture.register('testParent', testParent)
 
-        hazyStub.fixture.get('testParent').child.should.equal('|=missingChild|')
+        hazyStub.fixture.get('testParent').child.should.equal('|*missingChild|')
       })
 
       it('should be independent of whitespace', () => {
         const testChild  = {role: 'child'},
-              testParent = {role: 'parent', child: '|=  testChild |'}
+              testParent = {role: 'parent', child: '|*  testChild |'}
 
         hazyStub.fixture.register('testChild', testChild)
         hazyStub.fixture.register('testParent', testParent)
@@ -125,12 +125,12 @@ describe('lang', () => {
       })
     })
 
-    describe('*', () => {
+    describe('$', () => {
       it('should embed fixtures matching the provided jsonpath pattern', () => {
         const testFindMe1  = {id: '123'},
               testFindMe2  = {id: '456'},
               testAvoid1   = {bad: 'stuff'}, 
-              testSearcher = {allIds: '|$ .id|'}
+              testSearcher = {allIds: '|$.id|'}
 
         hazyStub.fixture.register('testFindMe1', testFindMe1)
         hazyStub.fixture.register('testFindMe2', testFindMe2)
@@ -156,7 +156,13 @@ describe('lang', () => {
       })
     })
 
-    describe('_', () => {
+    describe('>', () => {
+      it('should find and embed fixtures from either the filepath (by glob) or fixture pool', () => {
+
+      })
+    })
+
+    describe('?', () => {
       it('should find and embed fixtures from either the filepath (by glob) or fixture pool', () => {
 
       })
@@ -165,6 +171,33 @@ describe('lang', () => {
 
   describe('process()', () => {
 
+  })
+
+  describe('evaluate()', () => {
+    it('should be a defined method', () => {
+
+    })
+
+    it('should provide fixture pool to template', () => {
+
+    })
+
+    it('should provide random data generators to template', () => {
+
+    })
+
+    // -, !, =
+    describe('%', () => {
+
+    })
+
+    describe('!', () => {
+      
+    })
+
+    describe('=', () => {
+      
+    })
   })
 })
 
