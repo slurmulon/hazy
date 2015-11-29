@@ -428,7 +428,7 @@ Evaluates content as JavaScript, allowing you to perform `if` statements, loops,
 Specified with the `>` operator.
 
 ```javascript
-hazy.lang.process('{"random_point": "|> print(random.basic.integer({min: 0, max: 100}))|"}')
+hazy.lang.process('{"random_point": |> if (foo) {| |=random.basic.integer({min: 0, max: 100})| |> }|}', {foo: true})
 ```
 
 ## TODO
