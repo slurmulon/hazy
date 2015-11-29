@@ -332,7 +332,6 @@ describe('fixture', () => {
       hazyStub.fixture.process.should.be.a('function')
     })
 
-    // TODO
     describe('fixtures by type', () => {
       describe('object', () => {
         it('should process each key through hazy.lang', () => {
