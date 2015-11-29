@@ -62,7 +62,7 @@ hazy.lang = {
     },
 
     // random data
-    '~': (prev, next) => _.get(hazy.random, next.trim(), null),
+    '~': (prev, next) => _.get(hazy.random, next.trim(), '')(),
 
     // embed fixture (or any data really) from the pool
     '*': (prev, next) => hazy.fixture.get(next.trim()),
@@ -86,8 +86,8 @@ hazy.lang = {
   // extracts tokens from text and evaluates them for interpolation.
   // interpolates strings, ignores and simply returns other data types.
   process: (text) => {
-    let   result  = text
-    const matches = text.split(hazy.lang.expression.all)
+    let   result  = hazy.lang.evaluate(text)//text
+    const matches = result.split(hazy.lang.expression.all)
     const tokens  = []
 
     // match tokens and process them
@@ -111,8 +111,8 @@ hazy.lang = {
       }
     })
 
-    // evaluate post-processed text against custom lodash template
-    result = hazy.lang.evaluate(result)
+    // process interpolated text against custom lodash template
+    // result = hazy.lang.evaluate(result)
 
     // reduce complex token replacements (non-String, non-Number)
     if (!_.isEmpty(tokens)) {
@@ -126,16 +126,16 @@ hazy.lang = {
   // evaluates an interpolation template against text. operators defined here
   // essentially allow for the evaluation of JavaScript with global data.
   // use with caution as you can technically break the JSON specification.
-  evaluate: (text, options, data) => {
-    const _options = options || {
-      escape      : /\|%([\s\S]+?)\|/g,
-      evaluate    : /\|!([\s\S]+?)\|/g,
-      interpolate : /\|=([\s\S]+?)\|/g,
+  evaluate: (text, data) => {
+    const _data = data || {
+      pool   : hazy.fixture,
+      random : hazy.random
     }
 
-    const _data = data || {
-      fixtures : hazy.fixtures,
-      random   : hazy.random
+    const _options = {
+      escape      : /(?!(.*?)*)/g, // don't match anyhthing // /\|%([\s\S]+?)\|/g,
+      evaluate    : /\|!([\s\S]+?)\|/g,
+      interpolate : /\|=([\s\S]+?)\|/g,
     }
 
     return _.template(text, _options)(_data)
@@ -224,7 +224,7 @@ hazy.fixture = {
   processAll: (fixtures) => fixtures.map(fixture => hazy.fixture.process(fixture)),
 
   // queries the fixture pool for anything that matches the jsonpath pattern and processes it
-  query: (pattern, match) => hazy.matcher.search(pattern, match),
+  query: (pattern, handler) => hazy.matcher.search(pattern, handler),
 
   // glob and register a fixture from files matching a glob pattern
   glob: (pattern, options, key) => {
@@ -396,7 +396,7 @@ hazy.random = _.mapValues(hazy.meta.random.types, (value, key) => {
   let hazyRandObj = {}
   
   _.forEach(value, (v) => {
-     hazyRandObj[v] = () => new Chance()[v]()
+     hazyRandObj[v] = (conf) => new Chance()[v](conf)
   })
   
   return hazyRandObj

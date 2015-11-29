@@ -1,10 +1,10 @@
 # Hazy
 
-> Lazy and light-weight JSON fixtures in Node
+> Lazy data fixtures in Node
 
 -----
 
-Hazy aims to ease the hassle of generating, maintaining and working with JSON fixtures by making them DRY and more expressive.
+Hazy aims to ease the hassle of generating, maintaining and working with fixtures by making them DRY and more expressive.
 Hazy lets developers describe test data in a normailzed fasion and allows for fixtures to be processed further at run-time for increased flexibility.
 
 ### Features
@@ -24,23 +24,23 @@ Hazy lets developers describe test data in a normailzed fasion and allows for fi
 
 ### Example
 
-Here we register a couple of Hazy fixtures into what's refered to as the fixture pool:
+Here we register a couple of JSON fixtures into what's refered to as the fixture pool:
 
 ```javascript
 import 'hazy' from hazy
 
 hazy.fixture.register('someDude', {
-  id    : '|~misc:guid|',
-  name  : '|~person:prefix| |~person:name|',
-  email : '|~web:email|',
-  bday  : '|~person:birthday|',
-  ssn   : '|~person:ssn| (not really)',
+  id    : '|~ misc.guid|',
+  name  : '|~ person.prefix| |~person.name|',
+  email : '|~ web.email|',
+  bday  : '|~ person.birthday|',
+  ssn   : '|~ person.ssn| (not really)',
 })
 
 /* loads someDog.json, containing:
 {
-  id    : '|~misc:guid|',
-  owner : '|+someDude|'
+  id    : '|~ misc.guid|',
+  owner : '|* someDude|'
   name  : 'Dawg',
 }*/
 hazy.fixture.src('someDog')
@@ -101,7 +101,12 @@ then
 # Documentation
 
 The following provides a high-level summary of all of Hazy's features as well as some examples and gotchas.
-As of now more detailed documention does not exist (coming soon).
+
+A notable observation is that all of Hazy's tokens and expressions adhere to the following format:
+
+`|<operator> <expression|statement>|`
+
+Also note that whitespace is allowed throughout.
 
 ## Randomness
 
@@ -109,53 +114,56 @@ Hazy sits on top of ChanceJS, a great library for generating all sorts of useful
 Hazy categorizes ChanceJS's generation methods for a more symantic syntax, but otherwise integration
 is completely transparent.
 
-The token for generating random data is `~` (whitespace is allowed on all operators):
+The token for generating random data is `~`:
 
-`|~<class>:<type>|`
+`|~ <class>.<type>|`
 
 ### Random Data Tokens
 
-* `|~basic:<type>|`
+* `|~basic.<type>|`
 
   supports `'bool', 'character', 'integer', 'natural', 'string'`
 
-* `|~text:<type>|`
+* `|~text.<type>|`
 
   supports `'paragraph', 'sentence', 'syllable', 'word'`
 
-* `|~person:<type>|`
+* `|~person.<type>|`
 
   supports `'age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix'`
 
-* `|~mobile:<type>|`
+* `|~mobile.<type>|`
 
   supports `'android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2'`
 
-* `|~web:<type>|`
+* `|~web.<type>|`
 
   supports `'color', 'domain', 'email', 'fbid', 'google_analytics', 'hashtag', 'ip', 'ipv6', 'klout', 'tld', 'twitter', 'url'`
 
-* `|~geo:<type>|`
+* `|~geo.<type>|`
 
   supports `'address', 'altitude', 'areacode', 'city', 'coordinates', 'country', 'depth', 'geohash', 'latitude', 'longitude', 'phone', 'postal', 'province', 'state', 'street', 'zip'`
 
-* `|~time:<type>|`
+* `|~time.<type>|`
 
   supports `'ampm', 'date', 'hammertime', 'hour', 'millisecond', 'minute', 'month', 'second', 'timestamp', 'year'`
 
-* `|~misc:<type>|`
+* `|~misc.<type>|`
 
   supports `'guid', 'hash', 'hidden', 'n', 'normal', 'radio', 'rpg', 'tv', 'unique', 'weighted'`
 
 ## Embedding
 
-Hazy supports embedding of other JSON fixtures (or really any value) present in the fixture pool using the `=` operator.
-The example above shows this already:
+Hazy supports referencing and embedding other JSON fixtures (or really any value) present in the fixture pool using the `*` operator.
+
+`|* <fixture-pool-key>|`
+
+The `someDog` example above already shows how this is used:
 
 ```javascript
 hazy.fixture.register('someDog', {
-  id    : '|~ misc:guid|',
-  owner : '|= someDude|'
+  id    : '|~ misc.guid|',
+  owner : '|* someDude|'
   name  : 'Dawg',
 })
 ```
@@ -293,8 +301,8 @@ hazy.matcher.config({
 
 hazy.fixture.register('someDogWithOwner', {
   id    : '|~ misc:guid|',
+  owner : '|* someDude|'
   name  : 'Happy Dog',
-  owner : '|= someDude|'
 })
 
 hazy.fixture.register('someDogWithoutOwner', {
@@ -341,8 +349,8 @@ hazy.matcher.config({
 
 hazy.fixture.register('someDogWithOwner', {
   id    : '|~ misc:guid|',
+  owner : '|* someDude|'
   name  : 'Happy Dog',
-  owner : '|= someDude|'
 })
 
 const happyDog  = hazy.fixture.get('someDogWithOwner')
@@ -387,10 +395,34 @@ Lastly, you have some control over when evaluation occurs:
 
 Both implementations are technically lazy since their evaluation is deferred until the last minute, but `lazyGet` is even more so since it only runs once.
 
+## Scripting
+
+Hazy also evaluates text through a `lodash` interpolation template. This enables you
+to include JavaScript expressions in your fixtures.
+
+This is an experimental feature, so use it with caution.
+
+### Interpolate
+Insert the result of an expression. The fixture pool and random data factories are all available as variables.
+
+Specified with the `=` operator.
+
+```javascript
+hazy.lang.process('{"random_point": "|= random.basic.integer({min: 0, max: 100})|"}')
+```
+
+### Evaluate
+Evaluates content as JavaScript, allowing you to perform `if` statements, loops, etc.
+
+Specified with the `!` operator.
+
+```javascript
+hazy.lang.process('{"random_point": "|! print(random.basic.integer({min: 0, max: 100})|"})')
+```
+
 ## TODO
 
-- [ ] Repeater operator
-- [ ] Seeds and ranges for random data
-- [ ] Token parameters
+- [ ] Array literal operator
+- [ ] Seeds for random data
 - [ ] Support queryl
 - [ ] Remote fixtures via `http`
