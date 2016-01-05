@@ -126,7 +126,7 @@ hazy.lang = {
   // TODO - make collection aliases that are surrounded with brackets instead of '|'
   evaluate: (text, scope) => {
     const options = {
-      escape      : /(?!(.*?)*)/g, // don't match anyhthing
+      escape      : /(?!(.*?)*)/g, // don't match anything
       evaluate    : /\|>([\s\S]+?)\|/g,
       interpolate : /\|=([\s\S]+?)\|/g,
       imports     : {
@@ -227,7 +227,7 @@ hazy.fixture = {
   query: (pattern, handler) => hazy.matcher.search(pattern, handler),
 
   // glob and register a fixture from files matching a glob pattern
-  glob: (pattern, options, key) => {
+  glob: ({pattern, options, key, parse}) => {
     glob(pattern, options, (err, files) => {
       if (err) {
         throw new Error('failed to load file')
@@ -237,7 +237,7 @@ hazy.fixture = {
 
       files.forEach(file => {
         try {
-          hazy.fixture.src(file, fixtures.push)
+          hazy.fixture.src(file, parse, fixtures.push) // FIXME - .push no longer there, regression
         } catch (e) {
           throw new hazy.lang.exception(`failed to register fixture from "${file}" during glob`)
         }
@@ -248,20 +248,18 @@ hazy.fixture = {
   },
 
   // read in a fixture from the filesystem and register it
-  src(filepath) {
+  src(filepath, parse) {
     if (filepath) {
-      return fs.readFileSync(path.resolve(filepath), 'utf-8', (err, data) => {
-        if (!err) {
-          const fixtureKey  = filepath
-          const fixtureData = JSON.parse(hazy.fixture.process(data))
+      const data = fs.readFileSync(filepath, 'utf-8')
 
-          hazy.fixture.register(fixtureKey, fixtureData)
+      if (data) {
+        const fixtureKey  = filepath
+        const fixtureData = (parse ? JSON.parse : _ => _)(hazy.fixture.process(data))
 
-          return fixtureData
-        } else {
-          throw `failed to read file: ${err}`
-        }
-      })
+        hazy.fixture.register(fixtureKey, fixtureData)
+
+        return fixtureData
+      }
     } else {
       throw `failed to read file, filepath required`
     }

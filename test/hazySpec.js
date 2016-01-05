@@ -23,6 +23,10 @@ describe('lang', () => {
     hazyStub = hazy.fork()
   })
 
+  afterEach(() => {
+    hazyStub.fixture.removeAll()
+  })
+
   describe('expressions', () => {
     describe('all', () => {
       it('should match all expressions defined by two | (start/end) tokens and a leading operator in each case', () => {
@@ -53,11 +57,11 @@ describe('lang', () => {
   describe('tokens', () => {
     describe('|', () => {
       it('should do nothing unless the next token is a |', () => {
-        (function(){
+        (() => {
           hazyStub.lang.tokens['|'](null, 'anything')
         }).should.not.throw();
 
-        (function(){
+        (() => {
          hazyStub.lang.tokens['|'](null, '|')
         }).should.throw();
       })
@@ -140,10 +144,8 @@ describe('lang', () => {
       })
     })
 
-    xdescribe('@', () => {
-      it('should find and embed fixtures from either the filepath (by glob) or fixture pool', () => {
-        // TODO
-      })
+    describe('@', () => {
+      // TODO
     })
 
     xdescribe('?', () => {
@@ -424,7 +426,25 @@ describe('fixture', () => {
       hazyStub.fixture.src.should.be.a('function')
     })
 
-    // TODO
+    it('should find UTF-8 encoded fixtures from either the filepath (by glob) or fixture pool', () => {
+      const actualObj   = hazyStub.fixture.src('test/fixtures/glob.js', false)
+      const expectedObj = '{"globbin": true}\n'
+
+      actualObj.should.deep.equal(expectedObj)
+    })
+
+    it('should find and parse JSON fixtures from either the filepath (by glob) or fixture pool', () => {
+      const actualObj   = hazyStub.fixture.src('test/fixtures/glob.js', true)
+      const expectedObj = {globbin: true}
+
+      actualObj.should.deep.equal(expectedObj)
+    })
+
+    it('should register fixtures found on the filepath (by glob) or fixture pool', () => {
+      hazyStub.fixture.src('test/fixtures/glob.js')
+
+      JSON.parse(hazyStub.fixture.get('test/fixtures/glob.js')).should.deep.equal({globbin: true})
+    })
   })
 })
 
