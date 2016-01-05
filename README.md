@@ -422,6 +422,12 @@ Specified with the `=` operator.
 hazy.lang.process('{"random_point": "|= random.basic.integer({min: 0, max: 100})|"}')
 ```
 
+As a convenience, ES6's interpolation syntax can also be used:
+
+```javascript
+hazy.lang.process('{"random_point": "${random.basic.integer({min: 0, max: 100})}"}')
+```
+
 ### Evaluate
 Evaluates content as JavaScript, allowing you to perform `if` statements, loops, etc.
 
