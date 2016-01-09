@@ -5,11 +5,12 @@
 -----
 
 Hazy aims to ease the hassle of generating, maintaining and working with fixtures by making them DRY and more expressive.
-Hazy lets developers describe test data in a normailzed fasion and allows for fixtures to be processed further at run-time for increased flexibility.
+Hazy lets developers describe and generate test data in a normailzed fasion and allows for fixtures to be processed further
+at run-time for increased flexibility.
 
 ### Features
 
-* Language specification for supporting both normalized and random data in fixtures
+* Simple syntax for supporting both normalized and random data in fixtures
 * DRY, embeddable, and queryable fixtures / sub-fixtures
 * Random `String`, `Number` and `Date` data via `ChanceJS`
 * Lazy processing via run-time queries ([JsonPath](http://goessner.net/articles/JsonPath/))
@@ -112,7 +113,7 @@ Supported operators are:
  * `~` generate random data
  * `*` embed fixture data from pool
  * `$` query by `JsonPath` pattern and embed fixture from pool
- * `@` find and embed fixture from pool
+ * `@` find and embed fixture from filesystem
  * `?` find and embed fixture from pool or filesystem
  * `>` evaluate content as literal JavaScript
  * `=` interpolate expression result
@@ -439,7 +440,9 @@ hazy.lang.process('{"random_point": |> if (foo) {| |=random.basic.integer({min: 
 
 ## TODO
 
+- [ ] Silent override (useful for loading fixtures into pool without having to print the contents)
 - [ ] Array literal operator
 - [ ] Seeds for random data
 - [ ] Support queryl
 - [ ] Remote fixtures via `http`
+- [ ] CLI
