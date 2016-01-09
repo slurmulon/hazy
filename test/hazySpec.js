@@ -402,7 +402,13 @@ describe('fixture', () => {
       hazyStub.fixture.processAll.should.be.a('function')
     })
 
-    // TODO
+    it('should process a collection of fixtures', () => {
+      const testProcess = hazyStub.fixture.processAll(['|~basic.natural|', '|~basic.string|'])
+
+      testProcess.should.not.be.empty
+      testProcess[0].should.be.a('string') // TODO - consider returning this as a number instead
+      testProcess[1].should.be.a('string')
+    })
   })
 
   describe('query()', () => {
@@ -456,29 +462,89 @@ describe('fixture', () => {
 // \/    \/\__,_|\__\___|_| |_|\___|_|  |___/
 //
 
-xdescribe('matcher', () => {
+describe('matcher', () => {
+  let hazyStub
+
+  beforeEach(() => {
+    hazyStub = hazy.fork()
+  })
+
+  afterEach(() => {
+    hazyStub.matcher.pool = {}
+    hazyStub.config.matcher.use = true
+  })
+
+  describe('pool', () => {
+    it('should be a defined object', () => {
+      hazyStub.matcher.pool.should.be.an('object')
+    })
+  })
 
   describe('config()', () => {
+    it('should be a defined method', () => {
+      hazyStub.matcher.config.should.be.a('function')
+    })
 
+    it('should register a matcher fixture into the matcher pool', () => {
+      const testPath = '$..*'
+      const testConfig = {path: testPath, handle: true}
+
+      hazyStub.matcher.config(testConfig)
+      hazyStub.matcher.pool[testPath].should.deep.equal(testConfig)
+    })
   })
 
   describe('matches()', () => {
-    
+    let stubPath
+    let stubFixture
+
+    beforeEach(() => {
+      stubPath    = '$..foo'
+      stubFixture = {foo: '1'}
+    })
+
+    it('should be a defined method', () => {
+      hazyStub.matcher.matches.should.be.a('function')
+    })
+
+    it('should provide a map of all matched JsonPath patterns in the fixture (pattern as key)', () => {
+      hazyStub.matcher.config({path: stubPath, handle: () => true})
+      hazyStub.matcher.matches(stubFixture).should.deep.equal({'$..foo': ['1']})
+    })
+
+    it('should not match any fixtures if `hazy.config.matcher.use` is `false`', () => {
+      hazyStub.config.matcher.use = false
+      hazyStub.matcher.config({path: stubPath, handle: () => true})
+      hazyStub.matcher.matches(stubFixture).should.be.empty
+    })
   })
 
   describe('hasMatch()', () => {
+    it('should be a defined method', () => {
+      hazyStub.matcher.hasMatch.should.be.a('function')
+    })
+
+    it('should provide a map of all matched JsonPath patterns in the fixture (pattern as key)', () => {
+      hazyStub.config.matcher.use = true
+      hazyStub.matcher.config({path: '$..foo', handle: () => true})
+      hazyStub.matcher.hasMatch({foo: 'bar'}).should.be.true
+    })
+  })
+
+  xdescribe('search()', () => {
+    it('should be a defined method', () => {
+      hazyStub.matcher.search.should.be.a('function')
+    })
+
+    // it('should reject undefined values')
+    // it('should not match any fixtures if `hazy.config.matcher.use` or `process` is `false`', () => {})
+  })
+
+  xdescribe('process()', () => {
     
   })
 
-  describe('search()', () => {
-    
-  })
-
-  describe('process()', () => {
-    
-  })
-
-  describe('processDeep()', () => {
+  xdescribe('processDeep()', () => {
     
   })
 })

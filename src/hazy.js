@@ -191,7 +191,7 @@ hazy.fixture = {
 
   // dynamically process fixture values by type (object, string, array, or function)
   process: (fixture, match) => {
-    const processedFixture = _.clone(fixture, true) // fixture
+    const processedFixture = _.clone(fixture, true)
 
     if (_.isPlainObject(fixture)) {
       _.forEach(fixture, (value, key) => {
@@ -287,21 +287,9 @@ hazy.matcher = {
   // source of all fixture matchers
   pool: {},
 
-  // registers a fixture pattern with a value into the matcher pool
-  register: (path, value) => {
-    hazy.matcher.pool[path] = value
-  },
-
-  // registers a fixture pattern with an advanced config into the matcher pool
-  config: (config) => {
-    const matcherPath    = config.path,
-          matcherHandler = config.handle
-
-    if (hazy.matcher.pool[matcherPath]) {
-      delete hazy.matcher.pool[matcherPath]
-    }
-
-    hazy.matcher.pool[matcherPath] = {path: matcherPath, handle: matcherHandler}
+  // registers a fixture pattern matcher into the matcher pool
+  config: ({path, handle}) => {
+    hazy.matcher.pool[path] = {path, handle}
   },
 
   // provides a map of all matched patterns in a fixture (pattern as key)
@@ -330,7 +318,8 @@ hazy.matcher = {
     hazy.matcher.matches(fixture)
   ),
 
-  // search the fixture pool for fixtures matching a specific pattern (intentionally non-lazy- prone to recursion hell and there's also little benefit in evaluating random values)
+  // search the fixture pool for fixtures matching a specific pattern.
+  // intentionally non-lazy - prone to recursion hell and there's also little benefit in evaluating random values
   search: (pattern, process) => {
     const fixtures = _.values(hazy.fixture.pool) 
 

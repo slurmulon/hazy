@@ -23,6 +23,11 @@
     "stub",
     "json",
     "fixtures",
+    "random",
+    "query",
+    "jsonpath",
+    "test",
+    "dry",
     "lazy"
   ],
   "author": "MadHax",
@@ -31,7 +36,6 @@
     "url": "https://github.com/slurmulon/hazy/issues"
   },
   "dependencies": {
-    "acho": "^2.3.0",
     "chance": "~0.7.5",
     "glob": "^5.0.10",
     "jsonpath": "^0.1.4",
