@@ -1,7 +1,9 @@
 import 'blanket'
 
 import * as hazy from '../src/hazy'
-import _ from 'lodash'
+
+import forEach from 'lodash.foreach'
+import get from 'lodash.get'
 
 import chai from 'chai'
 import chaiThings from 'chai-things'
@@ -69,8 +71,8 @@ describe('lang', () => {
 
     describe('~', () => {
       it('should categorically interface to ChanceJS', () => {
-        _.forEach(hazy.meta.random.types, (subTypes, type) => {
-          _.forEach(subTypes, (subType) => {
+        forEach(hazy.meta.random.types, (subTypes, type) => {
+          forEach(subTypes, (subType) => {
             const randExp = type + '.' + subType,
                   randRes = hazyStub.lang.tokens['~'](null, randExp)
 
@@ -175,7 +177,7 @@ describe('lang', () => {
     })
 
     it('should evaluate text before processing it through the interpolator', () => {
-      const testTxt = '|> _.forEach([1,2,3,4], (i) => {| |~basic.character| |> })|';
+      const testTxt = '|> [1,2,3,4].forEach((i) => {| |~basic.character| |> })|';
 
       hazy.lang.process(testTxt).should.have.length(12)
     })
@@ -318,7 +320,7 @@ describe('fixture', () => {
 
     it('should process fixture and place it into the pool using the unprocessed key', () => {
       hazyStub.fixture.register('|~misc.guid|', true)
-      _.keys(hazyStub.fixture.pool).should.contain('|~misc.guid|')
+      Object.keys(hazyStub.fixture.pool).should.contain('|~misc.guid|')
     })
   })
 
@@ -559,9 +561,9 @@ describe('matcher', () => {
 
 describe('random', () => {
   it('should map to the ChanceJS library', () => {
-    _.forEach(hazy.meta.random.types, (subTypes, type) => {
-      _.forEach(subTypes, (subType) => {
-        _.get(hazy.random, `${type}.${subType}`).should.be.instanceof(Function)
+    forEach(hazy.meta.random.types, (subTypes, type) => {
+      forEach(subTypes, (subType) => {
+        get(hazy.random, `${type}.${subType}`).should.be.instanceof(Function)
       })
     })
   })
