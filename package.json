@@ -1,7 +1,7 @@
 {
   "name": "hazy",
   "version": "0.1.8",
-  "description": "Lazy JSON fixtures",
+  "description": "Lazy JSON fixtures in Node",
   "main": "./lib/hazy.js",
   "scripts": {
     "build": "node ./node_modules/.bin/babel src --out-dir lib",

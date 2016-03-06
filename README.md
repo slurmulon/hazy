@@ -1,6 +1,6 @@
 # Hazy
 
-> Lazy data fixtures in Node
+> Lazy JSON fixtures in Node
 
 -----
 
