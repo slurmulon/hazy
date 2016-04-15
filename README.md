@@ -31,17 +31,17 @@ Here we register a couple of JSON fixtures into what's refered to as the fixture
 import 'hazy' from hazy
 
 hazy.fixture.register('someDude', {
-  id    : '|~ misc.guid|',
-  name  : '|~ person.prefix| |~person.name|',
-  email : '|~ web.email|',
-  bday  : '|~ person.birthday|',
-  ssn   : '|~ person.ssn| (not really)',
+  id    : '|~misc.guid|',
+  name  : '|~person.prefix| |~person.name|',
+  email : '|~web.email|',
+  bday  : '|~person.birthday|',
+  ssn   : '|~person.ssn| (not really)',
 })
 
 /* loads someDog.json, containing:
 {
-  id    : '|~ misc.guid|',
-  owner : '|* someDude|'
+  id    : '|~misc.guid|',
+  owner : '|*someDude|'
   name  : 'Dawg',
 }*/
 hazy.fixture.src('someDog')
@@ -174,8 +174,8 @@ The `someDog` example above already shows how this is used:
 
 ```javascript
 hazy.fixture.register('someDog', {
-  id    : '|~ misc.guid|',
-  owner : '|* someDude|'
+  id    : '|~misc.guid|',
+  owner : '|*someDude|'
   name  : 'Dawg',
 })
 ```
@@ -252,9 +252,9 @@ Use of the operator is straight forward:
 
 ```javascript
 hazy.fixture.register('someShark', {
-  id   : '|~ misc:guid|',
+  id   : '|~misc:guid|',
   name : 'Tiger Shark',
-  ate  : '|$ .id|', // queries pool for any fixture with an "id" property at the highest level
+  ate  : '|$.id|', // queries pool for any fixture with an "id" property at the highest level
 })
 ```
 this will result with something like:
@@ -312,8 +312,8 @@ hazy.matcher.config({
 })
 
 hazy.fixture.register('someDogWithOwner', {
-  id    : '|~ misc:guid|',
-  owner : '|* someDude|'
+  id    : '|~misc:guid|',
+  owner : '|*someDude|'
   name  : 'Happy Dog',
 })
 
@@ -360,8 +360,8 @@ hazy.matcher.config({
 })
 
 hazy.fixture.register('someDogWithOwner', {
-  id    : '|~ misc:guid|',
-  owner : '|* someDude|'
+  id    : '|~misc:guid|',
+  owner : '|*someDude|'
   name  : 'Happy Dog',
 })
 
@@ -443,6 +443,7 @@ hazy.lang.process('{"random_point": |> if (foo) {| |=random.basic.integer({min: 
 - [ ] Silent override (useful for loading fixtures into pool without having to print the contents)
 - [ ] Array literal operator
 - [ ] Seeds for random data
+- [ ] Support JSON Pointer
 - [ ] Support queryl
 - [ ] Remote fixtures via `http`
 - [ ] CLI
