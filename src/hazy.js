@@ -204,12 +204,12 @@ hazy.fixture = {
 
   // dynamically process fixture values by type (object, string, array, or function)
   process: (fixture, match) => {
-    const processedFixture = Object.assign({}, fixture)
+    const processedFixture = fixture instanceof Object ? Object.assign({}, fixture) : fixture
 
     if (isPlainObject(fixture)) {
       forEach(fixture, (value, key) => {
-        const processedKey = hazy.lang.process(key),
-              nextFixture  = value
+        const processedKey = hazy.lang.process(key)
+        const nextFixture  = value
 
         // remove fixture with unprocessed key from pool to prevent duplicate entries
         delete processedFixture[key]
@@ -234,7 +234,7 @@ hazy.fixture = {
   },
 
   // processes each fixture in the array
-  processAll: (fixtures) => fixtures.map(fixture => hazy.fixture.process(fixture)),
+  processAll: (fixtures) => fixtures.map(hazy.fixture.process),
 
   // queries the fixture pool for anything that matches the jsonpath pattern and processes it
   query: (pattern, handler) => hazy.matcher.search(pattern, handler),

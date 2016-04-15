@@ -318,6 +318,14 @@ describe('fixture', () => {
       hazyStub.fixture.get('foo').bar.should.not.equal('|~basic.string|')
     })
 
+    it('should process incoming primitives and place them into the fixture pool', () => {
+      hazyStub.fixture.register('bool', {bar: true})
+      hazyStub.fixture.get('bool').bar.should.equal(true)
+
+      hazyStub.fixture.register('number', {bar: 123})
+      hazyStub.fixture.get('number').bar.should.equal(123)
+    })
+
     it('should process fixture and place it into the pool using the unprocessed key', () => {
       hazyStub.fixture.register('|~misc.guid|', true)
       Object.keys(hazyStub.fixture.pool).should.contain('|~misc.guid|')
