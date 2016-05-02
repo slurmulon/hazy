@@ -1,6 +1,6 @@
 import 'blanket'
 
-import * as hazy from '../src/hazy'
+import hazy from '../src/hazy'
 
 import forEach from 'lodash.foreach'
 import get from 'lodash.get'
