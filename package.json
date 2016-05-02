@@ -1,6 +1,6 @@
 {
   "name": "hazy",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Lazy JSON fixtures in Node",
   "main": "./lib/hazy.js",
   "scripts": {
