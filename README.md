@@ -28,7 +28,7 @@ at run-time for increased flexibility.
 Here we register a couple of JSON fixtures into what's refered to as the fixture pool:
 
 ```javascript
-import 'hazy' from hazy
+import hazy from 'hazy'
 
 hazy.fixture.register('someDude', {
   id    : '|~misc.guid|',
