@@ -31,8 +31,14 @@ const hazy = {}
 
 hazy.config = {
   matcher: {
-    use: true
+    use: true,
+    collapseWhitespace: true // whether or not to leave whitespace when performing string replacements
   },
+  fs: {
+    ext: {
+      assume: 'json'
+    }
+  }
 }
 
 hazy.meta = {
@@ -218,7 +224,7 @@ hazy.fixture = {
       })
     }
 
-    if (fixture.constructor === String) {
+    if (fixture && fixture.constructor === String) {
       return hazy.lang.process(fixture)
     }
     
@@ -240,30 +246,32 @@ hazy.fixture = {
   query: (pattern, handler) => hazy.matcher.search(pattern, handler),
 
   // glob and register a fixture from files matching a glob pattern
-  glob: ({pattern, options, key, parse}) => {
-    glob(pattern, options, (err, files) => {
-      if (err) {
-        throw new Error('failed to load file')
-      }
+  glob: ({pattern, options, parse, loose}) => {
+    let fixtures = []
 
-      const fixtures = []
+    try {
+      const files = glob.sync(pattern, options)
 
       files.forEach(file => {
         try {
-          hazy.fixture.src(file, parse, fixtures.push)
+          hazy.fixture.src(file, parse, loose, (data) => fixtures.push(data))
         } catch (e) {
           throw new hazy.lang.exception(`failed to register fixture from "${file}" during glob`)
         }
       })
+    } catch (e) {
+      throw new hazy.lang.exception('failed to load file')
+    }
 
-      return fixtures
-    })
+    return fixtures
   },
 
   // read in a fixture from the filesystem and register it
-  src(filepath, parse) {
+  src(filepath, parse = true, loose = true, success = _ => _) {
     if (filepath) {
-      const data = fs.readFileSync(filepath, 'utf-8')
+      const assume   = loose && !path.extname(filepath) && !filepath.endsWith('/')
+      const normpath = path.normalize(assume ? `${filepath}.${hazy.config.fs.ext.assume || 'json'}` : filepath)
+      const data     = fs.readFileSync(normpath, 'utf-8')
 
       if (data) {
         const fixtureKey  = filepath
@@ -271,11 +279,17 @@ hazy.fixture = {
 
         hazy.fixture.register(fixtureKey, fixtureData)
 
+        if (success instanceof Function) {
+          success(fixtureData)
+        }
+
         return fixtureData
       }
     } else {
-      throw `failed to read file, filepath required`
+      throw new hazy.lang.exception(`failed to read file, filepath required`)
     }
+
+    return null
   },
 
   // removes a fixture by name from the pool

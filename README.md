@@ -38,7 +38,7 @@ hazy.fixture.register('someDude', {
   ssn   : '|~person.ssn| (not really)',
 })
 
-/* loads someDog.json, containing:
+/* loads someDog.json (assumes .json extension when none is provided), containing:
 {
   id    : '|~misc.guid|',
   owner : '|*someDude|'
@@ -440,10 +440,11 @@ hazy.lang.process('{"random_point": |> if (foo) {| |=random.basic.integer({min: 
 
 ## TODO
 
-- [ ] Silent override (useful for loading fixtures into pool without having to print the contents)
+- [ ] Silent/collapsed whitespace override (useful for loading fixtures into pool without having to print the contents)
 - [ ] Array literal operator
 - [ ] Seeds for random data
+- [ ] Memoized/scoped random data
 - [ ] Support JSON Pointer
-- [ ] Support queryl
+- [ ] Support `json-rel`
 - [ ] Remote fixtures via `http`
 - [ ] CLI
