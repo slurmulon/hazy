@@ -252,7 +252,7 @@ Use of the operator is straight forward:
 
 ```javascript
 hazy.fixture.register('someShark', {
-  id   : '|~misc:guid|',
+  id   : '|~misc.guid|',
   name : 'Tiger Shark',
   ate  : '|$.id|', // queries pool for any fixture with an "id" property at the highest level
 })
@@ -312,13 +312,13 @@ hazy.matcher.config({
 })
 
 hazy.fixture.register('someDogWithOwner', {
-  id    : '|~misc:guid|',
+  id    : '|~misc.guid|',
   owner : '|*someDude|'
   name  : 'Happy Dog',
 })
 
 hazy.fixture.register('someDogWithoutOwner', {
-  id   : '|~ misc:guid|',
+  id   : '|~misc.guid|',
   name : 'Lonely Dog'
 })
 
@@ -360,7 +360,7 @@ hazy.matcher.config({
 })
 
 hazy.fixture.register('someDogWithOwner', {
-  id    : '|~misc:guid|',
+  id    : '|~misc.guid|',
   owner : '|*someDude|'
   name  : 'Happy Dog',
 })
