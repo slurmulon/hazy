@@ -270,6 +270,16 @@ describe('fixture', () => {
     })
   })
 
+  describe('find()', () => {
+    it('should be a defined method', () => {
+      hazyStub.fixture.find.should.be.a('function')
+    })
+
+    xit('should search for fixtures (by key) in both the pool and file system', () => {
+      // TODO
+    })
+  })
+
   describe('all()', () => {
     beforeEach(() => {
       hazyStub = hazy.fork()
@@ -434,7 +444,27 @@ describe('fixture', () => {
       hazyStub.fixture.glob.should.be.a('function')
     })
 
-    // TODO
+    it('should find UTF-8 encoded fixtures from the filepath', () => {
+      const actualObj   = hazyStub.fixture.glob({pattern: '**/fixtures/glob.*', parse: false})
+      const expectedObj = ['{"globbin": true}\n']
+
+      actualObj.should.deep.equal(expectedObj)
+    })
+
+    it('should find and parse JSON fixtures from the filepath', () => {
+      const actualObj   = hazyStub.fixture.glob({pattern: '**/fixtures/glob.*', parse: true})
+      const expectedObj = [{globbin: true}]
+
+      actualObj.should.deep.equal(expectedObj)
+    })
+
+    xit('should register fixtures found on the filepath', () => {
+      // TODO
+    })
+
+    xit('should register fixture found on the filepath without needing to provide the .json extension', () => {
+      // TODO
+    })
   })
 
   describe('src()', () => {
@@ -442,24 +472,28 @@ describe('fixture', () => {
       hazyStub.fixture.src.should.be.a('function')
     })
 
-    it('should find UTF-8 encoded fixtures from either the filepath (by glob) or fixture pool', () => {
-      const actualObj   = hazyStub.fixture.src('test/fixtures/glob.js', false)
-      const expectedObj = '{"globbin": true}\n'
+    it('should find UTF-8 encoded fixtures from the filepath', () => {
+      const actualObj   = hazyStub.fixture.src('test/fixtures/find.js', false)
+      const expectedObj = '{"found": true}\n'
 
       actualObj.should.deep.equal(expectedObj)
     })
 
-    it('should find and parse JSON fixtures from either the filepath (by glob) or fixture pool', () => {
-      const actualObj   = hazyStub.fixture.src('test/fixtures/glob.js', true)
-      const expectedObj = {globbin: true}
+    it('should find and parse JSON fixtures from the filepath', () => {
+      const actualObj   = hazyStub.fixture.src('test/fixtures/find.js', true)
+      const expectedObj = {found: true}
 
       actualObj.should.deep.equal(expectedObj)
     })
 
-    it('should register fixtures found on the filepath (by glob) or fixture pool', () => {
-      hazyStub.fixture.src('test/fixtures/glob.js')
+    it('should register fixtures found on the filepath', () => {
+      hazyStub.fixture.src('test/fixtures/find.js')
+      hazyStub.fixture.get('test/fixtures/find.js').should.deep.equal({found: true})
+    })
 
-      JSON.parse(hazyStub.fixture.get('test/fixtures/glob.js')).should.deep.equal({globbin: true})
+    it('should register fixture found on the filepath without needing to provide the .json extension', () => {
+      hazyStub.fixture.src('test/fixtures/assume')
+      hazyStub.fixture.get('test/fixtures/assume').should.deep.equal({assumed: true})
     })
   })
 })
