@@ -204,7 +204,7 @@ hazy.fixture = {
     if (fixtureMap instanceof Object) {
       forEach(fixtureMap, (fixture, name) => hazy.fixture.register(name, fixture))
     } else {
-      throw new Error('Fixture map following {name: fixture} must be provided')
+      throw 'a fixture map following {name: fixture} must be provided'
     }
   },
 
@@ -256,11 +256,11 @@ hazy.fixture = {
         try {
           hazy.fixture.src(file, parse, loose, (data) => fixtures.push(data))
         } catch (e) {
-          throw new hazy.lang.exception(`failed to register fixture from "${file}" during glob`)
+          throw `failed to register fixture from "${file}" during glob`
         }
       })
     } catch (e) {
-      throw new hazy.lang.exception('failed to load file')
+      throw 'failed to load file'
     }
 
     return fixtures
@@ -286,7 +286,7 @@ hazy.fixture = {
         return fixtureData
       }
     } else {
-      throw new hazy.lang.exception(`failed to read file, filepath required`)
+      throw 'failed to read file, filepath required'
     }
 
     return null
