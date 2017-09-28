@@ -1,6 +1,6 @@
 # Hazy
 
-> Lazy JSON fixtures in Node
+> :partly_sunny:  Lazy JSON fixtures in Node
 
 -----
 
