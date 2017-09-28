@@ -441,6 +441,8 @@ hazy.lang.process('{"random_point": |> if (foo) {| |=random.basic.integer({min: 
 ## TODO
 
 - [ ] Silent/collapsed whitespace override (useful for loading fixtures into pool without having to print the contents)
+- [ ] Retain indentation of parent line
+- [ ] Cache last randomly generated result and allow user to easily re-use the latest value (allows fixtures to be consistent with each other when needed)
 - [ ] Array literal operator
 - [ ] Seeds for random data
 - [ ] Memoized/scoped random data
