@@ -44,7 +44,7 @@ hazy.config = {
 hazy.meta = {
   random: {
     types: {
-      basic  : ['bool', 'character', 'integer', 'natural', 'string'],
+      basic  : ['bool', 'character', 'integer', 'natural', 'floating', 'string'],
       text   : ['paragraph', 'sentence', 'syllable', 'word'],
       person : ['age', 'birthday', 'cpf', 'first', 'gender', 'last', 'name', 'prefix', 'ssn', 'suffix'],
       mobile : ['android_id', 'apple_token', 'bb_pin', 'wp7_anid', 'wp8_anid2'],
